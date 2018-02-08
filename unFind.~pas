@@ -1,0 +1,244 @@
+unit unFind;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ShrFunc, StdCtrls, Buttons, ComCtrls, ExtCtrls, unMainForm;
+
+type
+  TfmFind = class(TMainForm)
+    Label1: TLabel;
+    ed1: TEdit;
+    Label5: TLabel;
+    Label7: TLabel;
+    ed3: TEdit;
+    ed4: TEdit;
+    Label3: TLabel;
+    ed2: TEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure ed1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ed2KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ed3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ed4KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    { Private declarations }
+  public
+    kf: word;
+    { Public declarations }
+  end;
+
+var
+  fmFind: TfmFind;
+
+implementation
+uses unMain, unIS, unProj, unPrj_S, IBQuery, DB;
+
+const
+  id_Form = 21;
+
+{$R *.dfm}
+
+procedure TfmFind.FormCreate(Sender: TObject);
+begin
+  kf := 0;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read(Self, iniForm);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmFind.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if dmIS.dbIS.Connected then
+    with TUserSettings.Create(dmIS.dbIS, id_Form) do
+    try
+      Write(Self, iniForm);
+    finally
+      Free;
+    end;
+end;
+
+// Поиск проекта
+
+procedure TfmFind.ed1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  C_ID: integer;
+begin
+  if ed1.Text = '' then
+    exit;
+  try
+    C_ID := StrToInt(ed1.Text);
+  except
+    MsgError('Неправильно задан образец поиска', 'Проверка');
+  end;
+  if Key = 13 then
+    case kf of
+      // Поиск в текущих
+      1: with dmIS.qIN, dmIS.qIN.SQL do
+        begin
+          Close;
+          Clear;
+          Add('SELECT ID_PROJECT, ID_AGENT FROM PROJECTS ');
+          Add('WHERE ID_PROJECT = :pr1 AND D_CLOSE IS NULL');
+          ParamByName('pr1').AsInteger := C_ID;
+          Open;
+          if not IsEmpty then
+          begin
+            dmIS.qCliPrj.Locate('ID', FieldByName('ID_AGENT').AsInteger, []);
+            dmIS.qPrj.Locate('ID_PROJECT', C_ID, []);
+          end;
+        end;
+
+      // Поиск в архиве
+
+    end;
+end;
+
+// Поиск документата
+
+procedure TfmFind.ed2KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  C_ID: integer;
+begin
+  if ed2.Text = '' then
+    exit;
+  Screen.Cursor := crHourGlass;
+  try
+    C_ID := StrToInt(ed2.Text);
+  except
+    MsgError('Неправильно задан образец поиска', 'Проверка');
+  end;
+  if Key = 13 then
+    case kf of
+      // Поиск в текущих
+      1: with dmIS.qIN, dmIS.qIN.SQL do
+        begin
+          Close;
+          Clear;
+          Add('SELECT D.ID_PROJECT_DOC, P.ID_PROJECT, P.ID_AGENT');
+          Add('FROM PROJECTS P join PROJECT_DOCS D on D.ID_PROJECT = P.ID_PROJECT');
+          Add('and D.ID_PROJECT_DOC = :d1 WHERE P.D_CLOSE IS NULL');
+          ParamByName('d1').AsInteger := C_ID;
+          Open;
+          if not IsEmpty then
+          begin
+            dmIS.qCliPrj.Locate('ID', FieldByName('ID_AGENT').AsInteger, []);
+            dmIS.qPrj.Locate('ID_PROJECT', FieldByName('ID_PROJECT').AsInteger,
+              []);
+            if not Assigned(fmPrj_S) then
+              Application.CreateForm(TfmPrj_S, fmPrj_S);
+            fmPrj_S.Caption := 'Документы и ТЗ проекта - ' +
+              dmIS.qPrjNAME.AsString;
+            fmPrj_S.C_Prj := dmIS.qPrjID_PROJECT.AsInteger;
+            if not dmIS.dbDOC.Connected then
+              dmIS.dbDOC.Connected := True;
+            fmPrj_S.Show;
+            dmIS.qDOC.Locate('ID_PROJECT_DOC', C_ID, []);
+          end;
+        end;
+
+      // Поиск в архиве
+
+    end;
+  Screen.Cursor := crDefault;
+end;
+
+// Поиск заказа
+
+procedure TfmFind.ed3KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  C_ID: integer;
+begin
+  if ed3.Text = '' then
+    exit;
+  Screen.Cursor := crHourGlass;
+  try
+    C_ID := StrToInt(ed3.Text);
+  except
+    MsgError('Неправильно задан образец поиска', 'Проверка');
+  end;
+  if Key = 13 then
+    case kf of
+      // Поиск в текущих
+      1: with dmIS.qIN, dmIS.qIN.SQL do
+        begin
+          Close;
+          Clear;
+          Add('SELECT O.ID_ORDER, P.ID_PROJECT, P.ID_AGENT');
+          Add('FROM PROJECTS P join PROJECT_ORDS O on O.ID_PROJECT = P.ID_PROJECT');
+          Add('and O.ID_ORDER = :ord1 WHERE P.D_CLOSE IS NULL');
+          ParamByName('ord1').AsInteger := C_ID;
+          Open;
+          if not IsEmpty then
+          begin
+            dmIS.qCliPrj.Locate('ID', FieldByName('ID_AGENT').AsInteger, []);
+            dmIS.qPrj.Locate('ID_PROJECT', FieldByName('ID_PROJECT').AsInteger,
+              []);
+            if not Assigned(fmPrj_S) then
+              Application.CreateForm(TfmPrj_S, fmPrj_S);
+            fmPrj_S.Caption := 'Документы и ТЗ проекта - ' +
+              dmIS.qPrjNAME.AsString;
+            fmPrj_S.C_Prj := dmIS.qPrjID_PROJECT.AsInteger;
+            if not dmIS.dbDOC.Connected then
+              dmIS.dbDOC.Connected := True;
+            fmPrj_S.Show;
+            dmIS.qP_ORDS.Locate('ID_ORDER', C_ID, []);
+          end;
+        end;
+
+      // Поиск в архиве
+
+    end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmFind.ed4KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if ed4.Text = '' then
+    exit;
+  Screen.Cursor := crHourGlass;
+  if Key = 13 then
+    case kf of
+      // Поиск в текущих
+      1: with dmIS.qIN, dmIS.qIN.SQL do
+        begin
+          Close;
+          Clear;
+          Add('SELECT O.ID_ORDER, P.ID_PROJECT, P.ID_AGENT');
+          Add('FROM PROJECTS P join PROJECT_ORDS O on O.ID_PROJECT = P.ID_PROJECT');
+          Add('and UPPER(O.N_ORDER) = UPPER(:ord1) WHERE P.D_CLOSE IS NULL');
+          ParamByName('ord1').AsString := ed4.Text;
+          Open;
+          if not IsEmpty then
+          begin
+            dmIS.qCliPrj.Locate('ID', FieldByName('ID_AGENT').AsInteger, []);
+            dmIS.qPrj.Locate('ID_PROJECT', FieldByName('ID_PROJECT').AsInteger,
+              []);
+            if not Assigned(fmPrj_S) then
+              Application.CreateForm(TfmPrj_S, fmPrj_S);
+            fmPrj_S.Caption := 'Документы и ТЗ проекта - ' +
+              dmIS.qPrjNAME.AsString;
+            fmPrj_S.C_Prj := dmIS.qPrjID_PROJECT.AsInteger;
+            if not dmIS.dbDOC.Connected then
+              dmIS.dbDOC.Connected := True;
+            fmPrj_S.Show;
+            dmIS.qP_ORDS.Locate('ID_ORDER', FieldByName('ID_ORDER').AsInteger,
+              []);
+          end;
+        end;
+
+      // Поиск в архиве
+
+    end;
+  Screen.Cursor := crDefault;
+end;
+
+end.

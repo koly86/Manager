@@ -1,0 +1,267 @@
+unit unOrdProd;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ShrFunc, unMainForm, ComCtrls, ToolWin, ExtCtrls, StdCtrls,
+  Grids, DBGridEh, Mask, DBCtrlsEh, DBLookupEh, DB, IBCustomDataSet,
+  IBQuery, DBCtrls, Menus;
+
+type
+  TfmOrdProd = class(TMainForm)
+    clb1: TCoolBar;
+    tlb1: TToolBar;
+    tb0: TToolButton;
+    tlb2: TToolBar;
+    ToolButton2: TToolButton;
+    p1: TPanel;
+    p2: TPanel;
+    Splitter1: TSplitter;
+    ToolButton3: TToolButton;
+    Label1: TLabel;
+    dtp1: TDateTimePicker;
+    Label2: TLabel;
+    dtp2: TDateTimePicker;
+    ToolButton6: TToolButton;
+    cb1: TComboBox;
+    dbg1: TDBGridEh;
+    Label4: TLabel;
+    lcb1: TDBLookupComboboxEh;
+    qTPR: TIBQuery;
+    qTPRID_PTYPE: TIntegerField;
+    qTPRNAME: TIBStringField;
+    dsTPR: TDataSource;
+    p3: TPanel;
+    dbg4: TDBGridEh;
+    dbn3: TDBNavigator;
+    Splitter2: TSplitter;
+    Panel1: TPanel;
+    dbg2: TDBGridEh;
+    ToolButton1: TToolButton;
+    ToolButton4: TToolButton;
+    PopupMenu1: TPopupMenu;
+    Label32: TLabel;
+    ed1: TEdit;
+    ToolButton5: TToolButton;
+    tb1: TToolButton;
+    tb2: TToolButton;
+    tb3: TToolButton;
+    ToolButton10: TToolButton;
+    N1: TMenuItem;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure ToolButton2Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure dbg1DblClick(Sender: TObject);
+    procedure tb0Click(Sender: TObject);
+    procedure dbg1SortMarkingChanged(Sender: TObject);
+    procedure ed1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure N1Click(Sender: TObject);
+  private
+    C_PROD: integer;
+    procedure OpenProd;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmOrdProd: TfmOrdProd;
+
+implementation
+uses unMain, unIS, unREP, uAll;
+
+const
+  id_Form = 33;
+
+{$R *.dfm}
+
+procedure TfmOrdProd.OpenProd;
+begin
+  Screen.Cursor := crHourGlass;
+  with dmIS.qOrdProd, dmIS.qOrdProd.SQL do
+  begin
+    if Active then
+      C_PROD := dmIS.qOrdProdID_ORDER.AsInteger;
+    Close;
+    Clear;
+    Add('select distinct p.id_order, p.n_order, p.id_project, j.id_manager,');
+    Add('r.fio manager, i.name pname, t.name tpname, n.fio designer,');
+    Add('d.id_project_doc, d.id_draft, p.id_agent, a.name agent,');
+    Add('(p.price + p.pricea) price,');
+    Add('(select nds_val from get_nds_sum((p.price + p.pricea),1)) price_bez_nds,');
+    add('c.name curr');
+    Add('from project_ords p join projects j on j.id_project = p.id_project');
+    Add('join items i on i.id_item = p.id_product');
+    Add('join items a on a.id_item = p.id_agent');
+    Add('join project_ords_state s on s.id_order = p.id_order');
+    Add('and s.id_ord_event = 80');
+    if cb1.ItemIndex = 4 then
+    begin
+      Add('and s.d_fact between :d1 and :d2');
+      ParamByName('d1').AsDate := Int(dtp1.Date);
+      ParamByName('d2').AsDate := Int(dtp2.Date);
+    end;
+    Add('join ptypes t on t.id_ptype = p.id_cptype');
+    Add('join project_docs d on d.id_project_doc = p.id_doc');
+    Add('join currency c on c.id_currency = p.id_currency');
+    if cb1.ItemIndex = 1 then
+    begin
+      Add('join packpos pp on pp.id_order = p.id_order');
+      Add('join packing k on k.id_packing = pp.id_packing');
+      Add('and k.d_accept is not null and k.pack_type = 2');
+      Add('and k.d_pack between :d_in and :d_out');
+      ParamByName('d_in').AsDate := int(dtp1.Date);
+      ParamByName('d_out').AsDate := int(dtp2.Date);
+    end;
+    Add('left join personnel r on r.id_p = j.id_manager');
+    Add('left join personnel n on n.id_p = j.id_designer');
+    Add('where p.d_reject is null');
+    case cb1.ItemIndex of
+      0:
+        begin
+          Add('and (p.d_close is null or p.d_close > :d1) and p.d_open < :d1');
+          ParamByName('d1').AsDate := Int(dtp1.Date);
+        end;
+      2:
+        begin
+          Add('and p.d_close >= :d1 and p.d_open < :d2+1');
+          ParamByName('d1').AsDate := Int(dtp1.Date);
+          ParamByName('d2').AsDate := Int(dtp2.Date);
+        end;
+      3:
+        begin
+          Add('and p.d_close between :d1 and :d2');
+          ParamByName('d1').AsDate := Int(dtp1.Date);
+          ParamByName('d2').AsDate := Int(dtp2.Date);
+        end;
+    end;
+    if lcb1.KeyValue <> null then
+    begin
+      Add('and p.id_cptype = :tp1');
+      ParamByName('tp1').AsInteger := lcb1.KeyValue;
+    end;
+    if tb2.Down then
+      Add('and d.id_draft is not null');
+    if tb3.Down then
+      Add('and d.id_draft is null');
+    Add(OrdBy(dbg1));
+    Open;
+    Locate('ID_ORDER', C_PROD, []);
+    with dmIS.qOrd_PF do
+    begin
+      Close;
+      DataSource := dmIS.dsOrdProd;
+      Open;
+    end;
+    with dmIS.qCountDoc do
+    begin
+      Close;
+      DataSource := dmIS.dsOrdProd;
+      Open;
+    end;
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmOrdProd.FormCreate(Sender: TObject);
+begin
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read(Self, iniForm);
+    Read(p2, iniRect);
+    ReadEh(dbg1, id_Form);
+  finally
+    Free;
+  end;
+  dtp2.DateTime := now;
+  dtp1.DateTime := dtp2.DateTime;
+  cb1.ItemIndex := 0;
+end;
+
+procedure TfmOrdProd.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  dmIS.qOrdProd.Close;
+  dmIS.qOrd_PF.Close;
+  dmIS.qCountDoc.Close;
+  qTPR.Close;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Write(Self, iniForm);
+    Write(p2, iniRect);
+    Write(dbg1, iniGridEh);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmOrdProd.ToolButton2Click(Sender: TObject);
+begin
+  Screen.Cursor := crHourGlass;
+  GridToExcel(dbg1);
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmOrdProd.FormShow(Sender: TObject);
+begin
+  with qTPR do
+  begin
+    Close;
+    Open;
+    Last;
+    First;
+  end;
+  OpenProd;
+end;
+
+procedure TfmOrdProd.dbg1DblClick(Sender: TObject);
+begin
+  { if not dmIS.dbDOC.Connected then
+   try
+     dmIS.dbDOC.Connected := True;
+   except
+   end;  }
+  if dmIS.qOrdProdID_DRAFT.IsNull then
+  begin
+    MsgInformation('Ссылка на эскиз отсутствует', 'Вызов изображения');
+    exit;
+  end;
+  //fmMain.StoreDoc(0,dmIS.qOrdProdID_DRAFT.Value,'',dmIS.qR_BODY);
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+
+  Old_DocBody(dmIS.qOrdProdID_DRAFT.AsInteger, 0, '');
+    // переход на новую базу документов
+  //fmAll.StoreDoc_r(dmIS.qOrdProdID_DRAFT.Value);
+  //dmIS.dbDOC.Connected := False;
+end;
+
+procedure TfmOrdProd.tb0Click(Sender: TObject);
+begin
+  OpenProd;
+end;
+
+procedure TfmOrdProd.dbg1SortMarkingChanged(Sender: TObject);
+begin
+  OpenProd;
+end;
+
+procedure TfmOrdProd.ed1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  FindGridValue(dbg1, ed1, Key, 'ID_ORDER');
+end;
+
+procedure TfmOrdProd.N1Click(Sender: TObject);
+begin
+  if not Assigned(fmRep) then
+    Application.CreateForm(TfmRep, fmRep);
+  with fmREP do
+  begin
+    rOrdDate.Script.Variables['Din'] := DateToStr(dtp1.Date);
+    rOrdDate.ShowReport;
+  end;
+end;
+
+end.

@@ -1,0 +1,298 @@
+unit unPrDocs;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ShrFunc, unMainForm, DBGridEh, StdCtrls, ComCtrls, Mask,
+  DBCtrlsEh, DBLookupEh, Buttons, ExtCtrls, ToolWin, Grids, DBCtrls, Menus,
+  IBQuery, IBCustomDataSet;
+
+type
+  TfmPrDocs = class(TMainForm)
+    clb1: TCoolBar;
+    Panel2: TPanel;
+    pc1: TPageControl;
+    ts1: TTabSheet;
+    lb1: TListBox;
+    ts2: TTabSheet;
+    GroupBox1: TGroupBox;
+    cbx1: TComboBox;
+    GroupBox2: TGroupBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    dtp1: TDateTimePicker;
+    dtp2: TDateTimePicker;
+    cbx2: TComboBox;
+    cb1: TCheckBox;
+    cb2: TCheckBox;
+    ts3: TTabSheet;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    lcb1: TDBLookupComboboxEh;
+    lcb2: TDBLookupComboboxEh;
+    lcb3: TDBLookupComboboxEh;
+    lcb4: TDBLookupComboboxEh;
+    Panel3: TPanel;
+    sb0: TSpeedButton;
+    tlb1: TToolBar;
+    tb1: TToolButton;
+    ToolButton2: TToolButton;
+    tb2: TToolButton;
+    Label32: TLabel;
+    ed1: TEdit;
+    p1: TPanel;
+    dbn1: TDBNavigator;
+    dbg1: TDBGridEh;
+    pc2: TPageControl;
+    td1: TTabSheet;
+    td2: TTabSheet;
+    PopupMenu1: TPopupMenu;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure dbg1DblClick(Sender: TObject);
+    procedure ed1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure dbg1SortMarkingChanged(Sender: TObject);
+    procedure sb0Click(Sender: TObject);
+    procedure tb1Click(Sender: TObject);
+  private
+    C_DOC: integer;
+    procedure OpenDocs;
+    procedure ReadSelection;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmPrDocs: TfmPrDocs;
+
+implementation
+uses unMain, unIS, uAll;
+
+const
+  id_Form = 32;
+
+{$R *.dfm}
+
+procedure TfmPrDocs.ReadSelection;
+var
+  s: string;
+begin
+  pc1.ActivePage := ts1;
+  lb1.Clear;
+  if cb1.Checked then
+    lb1.Items.Add('Незавершенные проекты');
+  if cb2.Checked then
+    lb1.Items.Add('Завершенные проекты');
+  s := '';
+  if cbx1.ItemIndex > 0 then
+    s := 'Статус ' + cbx1.Text;
+  if s <> '' then
+    lb1.Items.Add(s);
+  s := '';
+  if cbx2.ItemIndex > 0 then
+  begin
+    case cbx2.ItemIndex of
+      1: s := 'Дата документа c ';
+      2: s := 'Дата регистрации c ';
+      3: s := 'Дата утверждения c ';
+    end;
+    s := s + DateToStr(dtp1.Date) + '  по ' + DateToStr(dtp2.Date);
+  end;
+  if s <> '' then
+    lb1.Items.Add(s);
+  if lcb1.KeyValue <> NULL then
+    lb1.Items.Add('Тип документа: ' + lcb1.Text);
+  if lcb2.KeyValue <> NULL then
+    lb1.Items.Add('Тип проекта: ' + lcb2.Text);
+  if lcb3.KeyValue <> NULL then
+    lb1.Items.Add('Зарегистрировал: ' + lcb3.Text);
+  if lcb4.KeyValue <> NULL then
+    lb1.Items.Add('Клиент: ' + lcb4.Text);
+end;
+
+procedure TfmPrDocs.OpenDocs;
+begin
+  Screen.Cursor := crHourGlass;
+  ReadSelection;
+  with dmIS.qPrDocs, dmIS.qPrDocs.SQL do
+  begin
+    if Active then
+      C_DOC := dmIS.qPrDocsID_PROJECT_DOC.AsInteger;
+    Close;
+    Clear;
+    Add('select d.ID_PROJECT_DOC, d.ID_PROJECT, d.NAME, d.DOC_TYPE, d.NUMBER,');
+    Add('d.D_DOC, d.D_IN, d.D_OUT, d.D_PROD, d.D_SHIPP, d.D_FIX, d.ID_FIX,');
+    Add('d.STATUS, d.ID_DRAFT, d.ID_FOTO, d.ID_SDOC, d.D_FILL, d.ID_FILL,');
+    Add('t.name ntype, i.name agent, r.fio, p.name pname, p.id_agent, s.fio fill');
+    Add('from project_docs d left join proj_doc_types t');
+    Add('on t.id_proj_doc_type = d.doc_type');
+    Add('join projects p on p.id_project = d.id_project');
+    Add('join items i on i.id_item = p.id_agent');
+    Add('left join personnel r on r.id_p = d.id_fix');
+    Add('left join personnel s on s.id_p = d.id_fill');
+    Add('where 1=1');
+    if cb1.Checked then
+      Add('and p.D_CLOSE is null');
+    if cb2.Checked then
+      Add('and p.D_CLOSE is not null');
+    if cbx1.ItemIndex > 0 then
+      case cbx1.ItemIndex of
+        1: Add('and (p.status = 0 or p.status is null)');
+        2: Add('and p.status = 1');
+        3: Add('and p.status = 2');
+        4: Add('and p.status = 3');
+        5: Add('and p.status = 4');
+      end;
+    if lcb1.KeyValue <> NULL then
+    begin
+      Add('and d.doc_type = :dt1');
+      ParamByName('dt1').AsInteger := lcb1.KeyValue;
+    end;
+    if lcb2.KeyValue <> NULL then
+    begin
+      Add('and p.id_proj_type = :pt1');
+      ParamByName('pt1').AsInteger := lcb2.KeyValue;
+    end;
+    if lcb3.KeyValue <> NULL then
+    begin
+      Add('and d.id_fix = :p1');
+      ParamByName('p1').AsInteger := lcb3.KeyValue;
+    end;
+    if lcb4.KeyValue <> NULL then
+    begin
+      Add('and p.id_agent = :ag1');
+      ParamByName('ag1').AsInteger := lcb4.KeyValue;
+    end;
+    if cbx2.ItemIndex > 0 then
+    begin
+      case cbx2.ItemIndex of
+        1: Add('and d.D_DOC >= :d1 and d.D_DOC < :d2');
+        2: Add('and d.D_FIX >= :d1 and d.D_FIX < :d2');
+        3: Add('and d.D_FILL >= :d1 and d.D_FILL < :d2');
+      end;
+      ParamByName('d1').AsDate := Int(dtp1.Date);
+      ParamByName('d2').AsDate := Int(dtp2.Date) + 1;
+    end;
+    Add(OrdBy(dbg1));
+    if Transaction.Active then
+      Transaction.CommitRetaining;
+    Open;
+    Locate('ID_PROJECT_DOC', C_DOC, []);
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmPrDocs.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  dmIS.qPrDocs.Close;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Write(Self, iniForm);
+    Write(dbg1, iniGridEh);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmPrDocs.FormCreate(Sender: TObject);
+begin
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read(Self, iniForm);
+    ReadEh(dbg1, id_Form);
+  finally
+    Free;
+  end;
+  dtp2.DateTime := now;
+  dtp1.DateTime := dtp2.DateTime - 7;
+end;
+
+procedure TfmPrDocs.FormShow(Sender: TObject);
+begin
+  lb1.Clear;
+  pc1.ActivePage := ts1;
+  pc2.ActivePage := td1;
+  cbx1.ItemIndex := 0;
+  cbx2.ItemIndex := 0;
+  with dmIS.qDTyp do
+  begin
+    Close;
+    Open;
+    Last;
+    First;
+  end;
+  with dmIS.qPr_Typ do
+  begin
+    Close;
+    Open;
+    Last;
+    First;
+  end;
+  with dmIS.qID_FIX do
+  begin
+    Close;
+    Open;
+    Last;
+    First;
+  end;
+  with dmIS.qAg do
+  begin
+    Close;
+    Open;
+    Last;
+    First;
+  end;
+  OpenDocs;
+end;
+
+procedure TfmPrDocs.dbg1DblClick(Sender: TObject);
+begin
+  {  if not dmIS.dbDOC.Connected then
+    try
+      dmIS.dbDOC.Connected := True;
+    except
+    end;        }
+  if dmIS.qPrDocsID_DRAFT.IsNull then
+  begin
+    MsgInformation('Вложение отсутствует', 'Вызов содержания документа');
+    exit;
+  end;
+  //fmMain.StoreDoc(0,dmIS.qPrDocsID_DRAFT.Value,'',dmIS.qR_BODY);
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+
+  Old_DocBody(dmIS.qPrDocsID_DRAFT.AsInteger, 0, '');
+    // переход на новую базу документов
+  // fmAll.StoreDoc_r(dmIS.qPrDocsID_DRAFT.Value);
+//  dmIS.dbDOC.Connected := False;
+end;
+
+procedure TfmPrDocs.ed1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  FindGridValue(dbg1, ed1, Key, 'ID_PROJECT_DOC');
+end;
+
+procedure TfmPrDocs.dbg1SortMarkingChanged(Sender: TObject);
+begin
+  OpenDocs;
+end;
+
+procedure TfmPrDocs.sb0Click(Sender: TObject);
+begin
+  OpenDocs;
+end;
+
+procedure TfmPrDocs.tb1Click(Sender: TObject);
+begin
+  Screen.Cursor := crHourGlass;
+  GridToExcel(dbg1);
+  Screen.Cursor := crDefault;
+end;
+
+end.

@@ -1,0 +1,432 @@
+unit unTr;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ComCtrls, DBSTrees, ExtCtrls, Buttons, StdCtrls, DB,
+  IBCustomDataSet, IBQuery, Grids, DBGridEh, shrfunc;
+
+type
+  TfmTr = class(TForm)
+    dbTr: TDBS_TreeView;
+    Panel1: TPanel;
+    SpeedButton1: TSpeedButton;
+    SpeedButton2: TSpeedButton;
+    SpeedButton3: TSpeedButton;
+    edFnd: TEdit;
+    Label1: TLabel;
+    qIns: TIBQuery;
+    dbgVer: TDBGridEh;
+    Splitter1: TSplitter;
+    qVEr: TIBQuery;
+    qVErID_VERSION: TIntegerField;
+    qVErNAME: TIBStringField;
+    dsVer: TDataSource;
+    GroupBox1: TGroupBox;
+    Panel2: TPanel;
+    Splitter2: TSplitter;
+    qGpState: TIBQuery;
+    qGpStateID_P_AREA: TIntegerField;
+    qGpStateANAME: TIBStringField;
+    qGpStateOBJ_NAME: TIBStringField;
+    qGpStateVNAME: TIBStringField;
+    qGpStateID_BATCH: TIntegerField;
+    qGpStateID_ORDER_POS: TIntegerField;
+    qGpStateID_ORDER: TIntegerField;
+    qGpStateID_PRODUCT: TIntegerField;
+    qGpStateAMOUNT: TIBBCDField;
+    qGpStateFREE: TIBBCDField;
+    qGpStateREZERV: TIBBCDField;
+    qGpStateREZERVPONAKL: TIBBCDField;
+    dsGpState: TDataSource;
+    dbgGPState: TDBGridEh;
+    Panel3: TPanel;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    edPrice: TEdit;
+    edAmount: TEdit;
+    edSumm: TEdit;
+    BitBtn1: TBitBtn;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    qGpStatePRICE: TFMTBCDField;
+    qGpStateSUMMA: TIBBCDField;
+    edMedprice: TEdit;
+    edmedAmount: TEdit;
+    edMedSumma: TEdit;
+    edMedProfit: TEdit;
+    edMedprofSumm: TEdit;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    BitBtn2: TBitBtn;
+    qMedPos: TIBQuery;
+    dsMedPos: TDataSource;
+    qMedPosMED_AM: TIBBCDField;
+    qMedPosMED_SUM: TIBBCDField;
+    qMedPosMED_PRICE: TFMTBCDField;
+    qMedPosMED_PROF_PRICE: TFloatField;
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
+    procedure SpeedButton3Click(Sender: TObject);
+    procedure dbTrDblClick(Sender: TObject);
+    procedure dbTrChange(Sender: TObject; Node: TTreeNode);
+    procedure qGpStateBeforeOpen(DataSet: TDataSet);
+    procedure qGpStateAfterScroll(DataSet: TDataSet);
+    procedure qVErBeforeOpen(DataSet: TDataSet);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure qMedPosBeforeOpen(DataSet: TDataSet);
+    procedure qMedPosAfterOpen(DataSet: TDataSet);
+    procedure edMedProfitKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+  private
+    { Private declarations }
+    procedure FindInTree_Det(ItemID: integer);
+    function NewBill(tp : integer) : integer;
+    function NewBillPos(id_bill : integer) : integer;
+
+  public
+    { Public declarations }
+    id_fnd : integer;
+    id_order : integer;
+  end;
+
+var
+  fmTr: TfmTr;
+
+implementation
+ uses unIS;
+{$R *.dfm}
+
+function TfmTr.NewBill(tp : integer) : integer;
+var id_bill : integer;
+begin
+ try
+  with qIns, qINs.sql do
+  begin
+    close;
+    clear;
+    if Transaction.Active then Transaction.CommitRetaining;
+    add('select first 1 GEN_ID(bill_id, 1) id from  access_levels');
+    open;
+    id_bill := fieldbyname('id').AsInteger;
+    close;
+    clear;
+    add('insert into p_area_bills (id_pa_bill, id_p_area, pa_bill_type,  d_edit, id_edit )');
+    add('values (:id_pa_bill, :id_p_area, :tp, current_date, :id_edit )');
+    parambyname('id_pa_bill').AsInteger := id_bill;
+    parambyname('id_p_area').AsInteger :=  qGpStateID_P_AREA.AsInteger;
+    parambyname('id_edit').AsInteger :=   SysVars.RegTN;
+    parambyname('tp').AsInteger :=   tp;
+
+    ExecSQL;
+    Result := id_bill;
+    if Transaction.Active then Transaction.CommitRetaining;
+  end;
+ except Result := -1;
+        MsgError('Ошибка создания накладной','Ошибка');
+ end
+end;
+
+function TfmTr.NewBillPos(id_bill : integer) : integer;
+var id_pos : integer;
+begin
+ try
+  with qIns, qINs.sql do
+  begin
+    close;
+    clear;
+    if Transaction.Active then Transaction.CommitRetaining;
+    add('select first 1 GEN_ID(obj_id, 1) id from  access_levels');
+    open;
+    id_pos := fieldbyname('id').AsInteger;
+    close;
+    clear;
+    add('insert into pa_bill_pos (id_pa_bill_pos, id_pa_bill, id_object,');
+    add('id_batch, amount, obj_type,  summa,  id_order)');
+    add('values (:id_pa_bill_pos, :id_pa_bill, :id_object, :id_batch,:amount,');
+    add('4, :summa, :id_order)');
+    parambyname('id_pa_bill_pos').AsInteger :=   id_pos;
+    parambyname('id_pa_bill').AsInteger     :=   id_bill;
+    parambyname('id_object').AsInteger      :=   qGpStateID_PRODUCT.AsInteger;
+    parambyname('id_batch').AsInteger       :=   qGpStateID_BATCH.AsInteger;
+    parambyname('summa').AsFloat            :=   strtofloat(edSumm.text);
+    parambyname('amount').AsFloat           :=   strtofloat(edAmount.text);
+    parambyname('id_order').AsInteger       :=   id_order;
+    ExecSQL;
+    if Transaction.Active then Transaction.CommitRetaining;
+    Result :=  id_pos;
+  end;
+ except Result := -1;
+        MsgError('Ошибка записи позиции в накладную','Ошибка');
+ end
+end;
+
+procedure TfmTr.SpeedButton1Click(Sender: TObject);
+begin
+ with dbtr do
+ begin
+    ClearTree;
+    RootId := 4;
+    Items.BeginUpdate;
+    BuildTree;
+    FullExpand;
+    Items.EndUpdate;
+    Selected := Items[0];
+  end;
+end;
+
+procedure TfmTr.FindInTree_Det(ItemID: integer);
+var i : integer;
+begin
+  dbtr.Items.BeginUpdate;
+  for i := 0 to dbtr.Items.Count - 1 do
+    if Integer(dbtr.Items[i].Data) = ItemId Then
+    begin
+      dbtr.Selected := dbtr.Items[i];
+      break;
+    end;
+  dbtr.Items.EndUpdate;
+  dbtr.Selected.MakeVisible;
+end;
+
+procedure TfmTr.FormShow(Sender: TObject);
+begin
+  fmTr.ModalResult := mrNone;
+  with dbtr do
+ begin
+    ClearTree;
+    RootId := 4;
+    Items.BeginUpdate;
+    BuildTree;
+    //FullExpand;
+    Items.EndUpdate;
+    Selected := Items[0];
+  end;
+  if id_fnd <> -1 then
+   FindInTree_Det(id_fnd);
+   qMedPos.Close;
+  qMedPos.Open;
+end;
+
+procedure TfmTr.SpeedButton2Click(Sender: TObject);
+begin
+ with qINs, qINs.sql do
+ begin
+  close;
+  clear;
+  add('select low from items where id_item = :id_item');
+  parambyname('id_item').AsInteger := dbtr.GetId;
+  open;
+  if fieldbyname('low').AsInteger = 1 then
+  begin
+    ShowMessage('Нельзя подставить группу!');
+    exit;
+  end else fmTr.ModalResult := mrOK;
+ end;
+end;
+
+procedure TfmTr.SpeedButton3Click(Sender: TObject);
+begin
+  fmTr.ModalResult := mrCancel;
+end;
+
+procedure TfmTr.dbTrDblClick(Sender: TObject);
+begin
+  fmTr.ModalResult := mrOK;
+end;                          // keybd_event(VK_RIGHT, 0, 0, 0);
+
+procedure TfmTr.dbTrChange(Sender: TObject; Node: TTreeNode);
+begin
+ qVer.close;
+ qVer.ParamByName('id_item').AsInteger := dbTr.GetId;
+ qVer.Open;
+end;
+
+procedure TfmTr.qGpStateBeforeOpen(DataSet: TDataSet);
+begin
+ Screen.Cursor := crHourGlass;
+  with qGPState, qGPState.sql do
+  begin
+    Close;
+    Clear ;
+    add('select a.id_p_area, a.name aname, coalesce( b.obj_name, i.name) obj_name,');
+    add(' v.name vname,');
+    add(' s.id_batch, s.id_order_pos, p.id_order,  p.id_product,');
+    add(' z.summa/z.amount price, sum(z.summa) summa,');
+    add('coalesce( sum(s.amount),0) - coalesce( sum(z.amount),0) -');
+    add('coalesce( sum(y.amount),0) free,');
+    add(' coalesce( sum(s.amount),0) amount, coalesce( sum(y.amount),0) rezerv,');
+    add(' coalesce( sum(z.amount),0) rezervponakl, coalesce( sum(s.amount),0) rezervponakl');
+    add(' from p_area_states s');
+    add(' join prod_areas a on a.id_p_area = s.id_p_area');
+    add('left join project_ords_pos p on p.id_order_pos = s.id_order_pos');
+    add('join product_objects b on b.id_object = s.id_object');
+    add('join product_versions v on v.id_version = b.id_version');
+    add('left join items i on i.id_item = b.id_item');
+    add(' left join pa_bill_pos y on y.id_batch = s.id_batch and');
+    add('  (select  pa_bill_type from p_area_bills where id_pa_bill = y.id_pa_bill) = 121');
+    add('left join pa_bill_pos z on z.id_batch = s.id_batch');
+    add('and');
+    add(' (select  pa_bill_type from p_area_bills where id_pa_bill = y.id_pa_bill)');
+    add(' in (110,106,101)');
+
+    add('where s.id_object in ');
+    add(' (select id_object from product_objects where id_version = :id_version)');
+    add('and a.id_patype = 10 and a.d_close is null');
+    add('and s.id_object_type = 4');
+    add('group by 1,2,3,4,5,6,7,8,9 ');
+
+{    add('select a.id_p_area, a.name aname, coalesce( b.obj_name, i.name) obj_name  ,');
+    add(' v.name vname, s.id_batch, s.id_order_pos, p.id_order,  p.id_product,');
+    add(' z.summa/z.amount price, sum(z.summa) summa,');
+    add('sum(s.amount) - sum(z.amount) - sum(y.amount) free,');
+    add('sum(s.amount) amount, sum(y.amount) rezerv,');
+    add('sum(z.amount) rezervponakl');
+    add('from p_area_states s');
+    add('join prod_areas a on a.id_p_area = s.id_p_area');
+    add('left join project_ords_pos p on p.id_order_pos = s.id_order_pos');
+    add('join product_objects b on b.id_object = s.id_object');
+    add('join product_versions v on v.id_version = b.id_version');
+    add('left join items i on i.id_item = b.id_item');
+    add('left join pa_bill_pos y on y.id_batch = s.id_batch');
+    add('left join p_area_bills b1 on b1.id_pa_bill = y.id_pa_bill');
+    add('  and b1.pa_bill_type = 121    ');
+    add('left join pa_bill_pos z on z.id_batch = s.id_batch');
+    add('left join p_area_bills b2 on b2.id_pa_bill = z.id_pa_bill');
+    add('  and b2.pa_bill_type in(110,106,101)');
+    add('where s.id_object in');
+    add(' (select id_object from product_objects where id_version = :id_version)');
+    add('and a.id_patype = 10 and a.d_close is null');
+    add('and s.id_object_type = 4');
+    add('group by 1,2,3,4,5,6,7,8,9');
+ }
+    Case SysVars.ServType of
+      0 : Add(OrderBy(dbgGPState));
+      1 : Add(OrderByFields(dbgGPState));
+    end;
+    parambyname('id_version').AsInteger := qVErID_VERSION.AsInteger;
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmTr.qGpStateAfterScroll(DataSet: TDataSet);
+begin
+ if qGpState.IsEmpty then exit;
+  edAmount.Text := qGpStateAMOUNT.AsString;
+  edSumm.Text   := qGpStateSUMMA.AsString;
+  edPrice.Text  := qGpStatePRICE.AsString;
+end;
+
+procedure TfmTr.qVErBeforeOpen(DataSet: TDataSet);
+begin
+  qGpState.close;
+  qGpState.Open;
+end;
+
+procedure TfmTr.BitBtn1Click(Sender: TObject);
+var s : string;
+    id : integer;
+begin
+
+
+ if qGpState.IsEmpty then exit;
+
+ try
+   s := FloatToStr(StrToFloat(edAmount.Text));
+ except
+   ShowMessage('Вы должны ввести число в поле кол-во');
+   exit;
+ end;
+
+ try
+   s := FloatToStr(StrToFloat(edSumm.Text));
+ except
+   ShowMessage('Вы должны ввести число в поле сумма');
+   exit;
+ end;   
+
+ //если первый раз, то создать накладную, если другой склад, то создать другую накл
+  with qIns, qINs.sql do
+  begin
+    close;
+    clear;
+    add('select p.* from pa_bill_pos p');
+    add('join p_area_bills s on s.id_pa_bill = p.id_pa_bill');
+    add('where p.id_order = :id_order and s.id_p_area = :id_p_area');
+    parambyname('id_order').AsInteger := id_order;
+    parambyname('id_p_area').AsInteger := qGpStateID_P_AREA.AsInteger;
+    open;
+    if IsEmpty then //создать новую накл
+    begin
+      id := NewBill(121);
+      NewBillPOs(id);
+    end
+    else//добавить в существующую
+    begin
+      id := fieldbyname('id_pa_bill').AsInteger;
+      NewBillPOs(id);
+    end;
+  end;
+  qGpState.close;
+  qGpState.Open;
+  qMedPos.Close;
+  qMedPos.Open;
+end;
+
+procedure TfmTr.qMedPosBeforeOpen(DataSet: TDataSet);
+var s : string;
+begin
+ if  edMedProfit.Text = '' then edMedProfit.Text := '0';
+
+ try
+   s := FloatToStr(StrToFloat(edMedProfit.Text));
+ except
+   ShowMessage('Вы должны ввести число в поле наценка');
+   exit;
+ end;
+
+  with qMedPos, qMedPos.sql do
+  begin
+   close;
+   clear;
+   add('select avg(s.amount) med_am, avg(s.summa) med_sum,');
+   add('avg(s.summa)/avg(s.amount) med_price,');
+   add('avg(s.summa)*(1 + cast(:prof as double precision)/100) med_prof_price');
+   add('from pa_bill_pos s');
+   add('join p_area_bills b on b.id_pa_bill = s.id_pa_bill');
+   add('where s.id_order = :id_order and s.id_object = :id_object');
+   if edMedProfit.Text <> '' then
+    parambyname('prof').asfloat :=  strtofloat(edMedProfit.Text);
+    parambyname('id_order').AsInteger := id_order;
+    parambyname('id_object').AsInteger := qGpStateID_PRODUCT.AsInteger;
+  end;
+
+end;
+
+procedure TfmTr.qMedPosAfterOpen(DataSet: TDataSet);
+begin
+  edMedprice.Text    := qMedPosMED_PRICE.AsString;
+  edmedAmount.Text   := qMedPosMED_AM.AsString;
+  edMedSumma.text    := qMedPosMED_SUM.AsString;
+  edMedprofSumm.Text := qMedPosMED_PROF_PRICE.AsString;
+end;
+
+procedure TfmTr.edMedProfitKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+ if key = 13 then
+ begin
+  qMedPos.Close;
+  qMedPos.Open;
+ end;
+end;
+
+end.
+
+

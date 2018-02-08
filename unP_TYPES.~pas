@@ -1,0 +1,141 @@
+unit unP_TYPES;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ShrFunc, Grids, DBGrids, ExtCtrls, DBCtrls, DB, DBGridEh,
+  StdCtrls, ComCtrls, ToolWin;
+
+type
+  TfmP_TYPES = class(TForm)
+    dbn1: TDBNavigator;
+    dbg1: TDBGridEh;
+    CoolBar1: TCoolBar;
+    tb1: TToolBar;
+    cb1: TCheckBox;
+    cb_pr_str: TCheckBox;
+    cb_pr_tr: TCheckBox;
+    cb_pr_fill: TCheckBox;
+    tCopy: TToolButton;
+    tInsert: TToolButton;
+    ToolButton3: TToolButton;
+    ToolButton4: TToolButton;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+    procedure tCopyClick(Sender: TObject);
+    procedure tInsertClick(Sender: TObject);
+  private
+    ID_PROJ_TYPE :Integer; // Тип проекта
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmP_TYPES: TfmP_TYPES;
+
+implementation
+uses unMain, unIS, IBQuery, IBCustomDataSet;
+
+const
+  id_Form = 16;
+
+{$R *.dfm}
+
+procedure TfmP_TYPES.FormCreate(Sender: TObject);
+begin
+  ID_PROJ_TYPE := -1;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read(Self, iniForm);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmP_TYPES.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if dmIS.qP_TYPE.State in [dsInsert, dsEdit] then
+    dmIS.qP_TYPE.Post;
+  dmIS.qP_TYPE.Close;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Write(Self, iniForm);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmP_TYPES.FormActivate(Sender: TObject);
+begin
+  with dmIS.qP_TYPE do
+  begin
+    Close;
+    Clear;
+    Add('select * from PROJ_TYPES');
+    // Только действующие
+    if cb1.Checked then Add('where is_active > 0');
+    Add('order by ID_PROJ_TYPE');
+    if fmMain.UF29 then
+      UpdateObject := dmIS.upP_TYPE
+    else
+      UpdateObject := nil;
+    Open;
+  end;
+end;
+
+procedure TfmP_TYPES.tCopyClick(Sender: TObject);
+begin
+ ID_PROJ_TYPE := -1;
+ ID_PROJ_TYPE := dmIS.qP_TYPEID_PROJ_TYPE.AsInteger;
+end;
+
+procedure TfmP_TYPES.tInsertClick(Sender: TObject);
+begin
+ try
+  Screen.Cursor := crHourGlass;
+  with dmIS.qIN, dmIS.qIN.SQL do
+  begin
+   Close;
+   Clear;
+   Add('select first 1 d.id_row from proj_doc_data d');
+   Add('join proj_doc_structure s on s.id_row = d.id_row');
+   Add('where s.proj_type = :proj_type');
+   ParamByName('proj_type').AsInteger := dmIS.qP_TYPEID_PROJ_TYPE.AsInteger;
+   Open;
+   if not IsEmpty then
+   begin
+    MsgError('Копирование невозможно.','Внимание');
+   end;
+   Close;
+  end;
+
+  with dmIS.qIM, dmIS.qIM.SQL do
+  begin
+   Close;
+   Clear;
+   Add('execute procedure proj_copy_types (:id_proj_types,');
+   Add(':id_proj_types_new, :id_pr_str, id_pr_tr, :id_pr_fill)');
+   ParamByName('id_proj_types').AsInteger := ID_PROJ_TYPE;
+   ParamByName('id_proj_types_new').AsInteger := dmIS.qP_TYPEID_PROJ_TYPE.AsInteger;
+   if cb_pr_str.Checked then ParamByName('id_pr_str').AsInteger := 1
+   else ParamByName('id_pr_str').AsInteger := 0;
+   if cb_pr_tr.Checked then ParamByName('id_pr_tr').AsInteger := 1
+   else ParamByName('id_pr_tr').AsInteger := 0;
+   if cb_pr_fill.Checked then ParamByName('id_pr_fill').AsInteger := 1
+   else ParamByName('id_pr_fill').AsInteger := 0;
+   try
+    ExecSQL;
+    if Transaction.Active then Transaction.Commit;
+   except
+    if Transaction.Active then Transaction.Rollback;
+   end;
+  end;
+ finally
+  Screen.Cursor := crDefault;
+ end;
+end;
+
+end.

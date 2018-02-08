@@ -1,0 +1,282 @@
+unit unINDOCS;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ShrFunc, ComCtrls, Grids, DBGrids, DBCtrls, ExtCtrls, ToolWin,
+  IBQuery, StdCtrls, DB;
+
+type
+  TfmINDOCS = class(TForm)
+    stb1: TStatusBar;
+    pc1: TPageControl;
+    ts1: TTabSheet;
+    ts2: TTabSheet;
+    tlb1: TToolBar;
+    tb1: TToolButton;
+    tlb2: TToolBar;
+    tbh1: TToolButton;
+    p1: TPanel;
+    dbn1: TDBNavigator;
+    dbg1: TDBGrid;
+    p2: TPanel;
+    dbn2: TDBNavigator;
+    dbg2: TDBGrid;
+    p3: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    DBText1: TDBText;
+    DBText2: TDBText;
+    DBText3: TDBText;
+    DBText4: TDBText;
+    p4: TPanel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    DBText5: TDBText;
+    DBText6: TDBText;
+    DBText7: TDBText;
+    DBText8: TDBText;
+    p5: TPanel;
+    Panel1: TPanel;
+    Label9: TLabel;
+    dbg3: TDBGrid;
+    Splitter1: TSplitter;
+    Splitter2: TSplitter;
+    Label10: TLabel;
+    dbm1: TDBMemo;
+    ToolButton1: TToolButton;
+    tb2: TToolButton;
+    ToolButton2: TToolButton;
+    tbh2: TToolButton;
+    ToolButton3: TToolButton;
+    tb3: TToolButton;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormActivate(Sender: TObject);
+    procedure dbg2DblClick(Sender: TObject);
+    procedure dbg1DblClick(Sender: TObject);
+    procedure tb1Click(Sender: TObject);
+    procedure tbh1Click(Sender: TObject);
+    procedure pc1Change(Sender: TObject);
+    procedure dbg3DrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure tb2Click(Sender: TObject);
+    procedure tbh2Click(Sender: TObject);
+    procedure tb3Click(Sender: TObject);
+  private
+    C_DOC: integer;
+    procedure NewWorkDocs;
+    { Private declarations }
+  public
+    INDF, INDG: integer;
+    procedure OpenFills(iddoc: integer);
+    { Public declarations }
+  end;
+
+var
+  fmINDOCS: TfmINDOCS;
+
+implementation
+uses unMain, unIS, unFILL, unNewDiz, unREP, uAll;
+
+const
+  id_Form = 22;
+
+{$R *.dfm}
+
+procedure TfmINDOCS.NewWorkDocs;
+begin
+  with dmIS.qIN_F do
+  begin
+    if Active then
+      C_DOC := dmIS.qIN_FID_PROJ_DOC.AsInteger;
+    Close;
+    ParamByName('p1').AsInteger := SysVars.RegTN;
+    Open;
+    Last;
+    First;
+    INDF := RecordCount;
+    stb1.Panels[1].Text := 'К утверждению: ' + IntToStr(INDF);
+    Locate('ID_PROJ_DOC', C_DOC, []);
+  end;
+  with dmIS.qIN_G do
+  begin
+    if Active then
+      C_DOC := dmIS.qIN_GID_PROJ_DOC.AsInteger;
+    Close;
+    ParamByName('p1').AsInteger := SysVars.RegTN;
+    Open;
+    Last;
+    First;
+    INDG := RecordCount;
+    stb1.Panels[0].Text := 'Входящие: ' + IntToStr(INDG);
+    Locate('ID_PROJ_DOC', C_DOC, []);
+  end;
+  if pc1.ActivePage = ts1 then
+    OpenFills(dmIS.qIN_GID_PROJ_DOC.AsInteger);
+  if pc1.ActivePage = ts2 then
+    OpenFills(dmIS.qIN_FID_PROJ_DOC.AsInteger);
+end;
+
+procedure TfmINDOCS.OpenFills(iddoc: integer);
+begin
+  with dmIS.qFILL_D do
+  begin
+    Close;
+    ParamByName('idd1').AsInteger := iddoc;
+    Open;
+  end;
+end;
+
+procedure TfmINDOCS.FormCreate(Sender: TObject);
+begin
+  pc1.ActivePage := ts1;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read(Self, iniForm);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmINDOCS.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  dmIS.qFIO.Close;
+  dmIS.qAg.Close;
+  dmIS.qFILL_D.Close;
+  dmIS.qIN_F.Close;
+  dmIS.qIN_G.Close;
+  dmIS.qPrj.Close;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Write(Self, iniForm);
+  finally
+    Free;
+  end;
+  //  dmIS.dbDOC.Connected := False;
+end;
+
+procedure TfmINDOCS.FormActivate(Sender: TObject);
+begin
+  tb3.Enabled := fmMain.UF54;
+  if not Assigned(fmFILL) then
+    Application.CreateForm(TfmFILL, fmFILL);
+  with dmIS.qAg do
+  begin
+    Close;
+    Open;
+  end;
+  with dmIS.qFIO do
+  begin
+    Close;
+    Open;
+  end;
+  NewWorkDocs;
+  try
+    { if not dmIS.dbDOC.Connected then
+       dmIS.dbDOC.Connected := True;   }
+  except
+    raise;
+    MsgError('Соединение с базой документов не установлено', 'Внимание');
+  end;
+end;
+
+procedure TfmINDOCS.dbg2DblClick(Sender: TObject);
+begin
+  if dmIS.qIN_FID_DRAFT.IsNull then
+    exit;
+  //fmMain.StoreDoc(0,dmIS.qIN_FID_DRAFT.Value,'',dmIS.qR_BODY);
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  Old_DocBody(dmIS.qIN_FID_DRAFT.AsInteger, 0, '');
+    // переход на новую базу документов
+  // fmAll.StoreDoc_r(dmIS.qIN_FID_DRAFT.Value);
+end;
+
+procedure TfmINDOCS.dbg1DblClick(Sender: TObject);
+begin
+  if dmIS.qIN_GID_DRAFT.IsNull then
+    exit;
+  //fmMain.StoreDoc(0,dmIS.qIN_GID_DRAFT.Value,'',dmIS.qR_BODY);
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+
+  fmAll.StoreDoc_r(dmIS.qIN_GID_DRAFT.Value);
+end;
+
+procedure TfmINDOCS.tb1Click(Sender: TObject);
+begin
+  if dmIS.qIN_G.IsEmpty then
+    exit;
+  if (dmIS.qIN_GID_DES.AsInteger = 0) and
+    (MsgQuestion('Не назначен дизайнер проекта. Продолжить?',
+    'Проверка дизайнера.') = id_no) then
+    exit;
+  fmFILL.F_TP := 1;
+  fmFILL.Caption := 'Фиксация получения документа: ' + dmIS.qIN_GDNAME.AsString;
+  fmFILL.ShowModal;
+  NewWorkDocs;
+end;
+
+procedure TfmINDOCS.tbh1Click(Sender: TObject);
+begin
+  if dmIS.qIN_F.IsEmpty then
+    exit;
+  fmFILL.F_TP := 2;
+  fmFILL.Caption := 'Подписывание документа: ' + dmIS.qIN_FDNAME.AsString;
+  fmFILL.ShowModal;
+  NewWorkDocs;
+end;
+
+procedure TfmINDOCS.pc1Change(Sender: TObject);
+begin
+  if pc1.ActivePage = ts1 then
+    OpenFills(dmIS.qIN_GID_PROJ_DOC.AsInteger);
+  if pc1.ActivePage = ts2 then
+    OpenFills(dmIS.qIN_FID_PROJ_DOC.AsInteger);
+end;
+
+procedure TfmINDOCS.dbg3DrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumn;
+  State: TGridDrawState);
+begin
+  with dbg3.Canvas do
+  begin
+    if (dmIS.qFILL_DF_TYPE.AsInteger = 0) and not (gdFocused in State) then
+    begin
+      Font.Style := [fsStrikeOut];
+      FillRect(Rect);
+      TextOut(Rect.Left, Rect.Top, Column.Field.Text);
+    end
+    else
+      dbg3.DefaultDrawColumnCell(Rect, DataCol, Column, State);
+  end;
+end;
+
+procedure TfmINDOCS.tb2Click(Sender: TObject);
+begin
+  fmAll.PrintMainDoc(dmIS.qIN_GID_PROJ_DOC.AsInteger, 1);
+end;
+
+procedure TfmINDOCS.tbh2Click(Sender: TObject);
+begin
+  fmAll.PrintMainDoc(dmIS.qIN_FID_PROJ_DOC.AsInteger, 1);
+end;
+
+procedure TfmINDOCS.tb3Click(Sender: TObject);
+begin
+  if not fmMain.UF54 then
+    exit;
+  if not Assigned(fmNewDiz) then
+    Application.CreateForm(TfmNewDiz, fmNewDiz);
+  fmNewDiz.C_PROJ := dmIS.qIN_GID_PROJECT.AsInteger;
+  fmNewDiz.ShowModal;
+  NewWorkDocs;
+end;
+
+end.

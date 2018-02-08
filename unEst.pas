@@ -1,0 +1,780 @@
+unit unEst;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, unMainForm, ShrFunc, ComCtrls, ToolWin, ExtCtrls,
+  DB, IBCustomDataSet, IBQuery, Grids, DBGridEh, DBCtrls, StdCtrls, Menus,
+  Mask, DBCtrlsEh, DBLookupEh, DBSTrees, Buttons, ImgList, xlcClasses,
+  xlEngine, xlReport;
+
+type
+  TfmEst = class(TMainForm)
+    p1: TPanel;
+    p2: TPanel;
+    Splitter1: TSplitter;
+    clb1: TCoolBar;
+    tlb1: TToolBar;
+    tb1: TToolButton;
+    pc1: TPageControl;
+    ts1: TTabSheet;
+    ts2: TTabSheet;
+    tlb2: TToolBar;
+    tb0: TToolButton;
+    qEst: TIBQuery;
+    dsEst: TDataSource;
+    qEstID_ESTIMATE: TIntegerField;
+    qEstID_VERSION: TIntegerField;
+    qEstNAME: TIBStringField;
+    qEstD_CREATE: TDateTimeField;
+    qEstID_CREATOR: TIntegerField;
+    qEstD_CONFIRM: TDateTimeField;
+    qEstID_CONFIRM: TIntegerField;
+    qEstAMOUNT: TIntegerField;
+    qEstPRICE_DATE: TDateField;
+    qEstSUM_NDS: TFloatField;
+    qEstPRICE_DELIVERY: TFloatField;
+    qEstPRICE_TOOLS: TFloatField;
+    qEstPROFIT: TFloatField;
+    qEstID_DOC: TIntegerField;
+    qEstFIO: TIBStringField;
+    qEstCONF: TIBStringField;
+    qEstID_ITEM: TIntegerField;
+    qEstNPROD: TIBStringField;
+    dbg1: TDBGridEh;
+    tb2: TToolButton;
+    ToolButton4: TToolButton;
+    dbn1: TDBNavigator;
+    qMat: TIBQuery;
+    qOper: TIBQuery;
+    dsMat: TDataSource;
+    dsOper: TDataSource;
+    qMatID_OBJ: TIntegerField;
+    qMatAMOUNT: TFloatField;
+    qMatPRICE: TFloatField;
+    qMatSUMMA: TFloatField;
+    qMatNAME: TIBStringField;
+    qMatUNAME: TIBStringField;
+    dbg2: TDBGridEh;
+    Label32: TLabel;
+    ed1: TEdit;
+    qOperID_OBJ: TIntegerField;
+    qOperNAME: TIBStringField;
+    qOperUNAME: TIBStringField;
+    qOperPRICE: TFloatField;
+    qOperAMOUNT: TFloatField;
+    qOperSUMMA: TFloatField;
+    dbg3: TDBGridEh;
+    tb3: TToolButton;
+    ToolButton2: TToolButton;
+    tb4: TToolButton;
+    ToolButton5: TToolButton;
+    PopupMenu1: TPopupMenu;
+    qFIO: TIBQuery;
+    dsFIO: TDataSource;
+    qFIOID_P: TIntegerField;
+    qFIOFIO: TIBStringField;
+    ToolButton1: TToolButton;
+    Label5: TLabel;
+    lcb1: TDBLookupComboboxEh;
+    dsC_ORD: TDataSource;
+    ToolButton3: TToolButton;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    p3: TPanel;
+    Panel1: TPanel;
+    Label2: TLabel;
+    sb1: TSpeedButton;
+    ed2: TEdit;
+    dbt1: TDBS_TreeView;
+    qC_ORD: TIBQuery;
+    qC_ORDN_ORDER: TIBStringField;
+    qC_ORDNAME: TIBStringField;
+    qC_ORDID_PRODUCT: TIntegerField;
+    qC_ORDID_ESTIMATE: TIntegerField;
+    qC_ORDSTATUS: TIntegerField;
+    p5: TPanel;
+    Label3: TLabel;
+    DBText1: TDBText;
+    DBText2: TDBText;
+    DBText3: TDBText;
+    DBText4: TDBText;
+    Label4: TLabel;
+    Label6: TLabel;
+    p4: TPanel;
+    cb1: TCheckBox;
+    tb5: TToolButton;
+    ToolButton7: TToolButton;
+    il1: TImageList;
+    tb6: TToolButton;
+    ToolButton8: TToolButton;
+    xlReport1: TxlReport;
+    qEstDOP_PRICE: TFloatField;
+    qOperAMOUNT_TIME: TFloatField;
+    Splitter2: TSplitter;
+    N4: TMenuItem;
+    PopupMenu2: TPopupMenu;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    Excel1: TMenuItem;
+    Excel2: TMenuItem;
+    ToolButton6: TToolButton;
+    Label1: TLabel;
+    dtp1: TDBDateTimeEditEh;
+    ToolButton9: TToolButton;
+    Label7: TLabel;
+    dtp2: TDBDateTimeEditEh;
+    qEstPRICE_DELIVERY_BEZ_NDS: TFloatField;
+    qEstPRICE_TOOLS_BEZ_NDS: TFloatField;
+    qMatPRICE_BEZ_NDS: TFloatField;
+    qMatSUMMA_BEZ_NDS: TFloatField;
+    qOperPRICE_BEZ_NDS: TFloatField;
+    qOperSUMMA_BEZ_NDS: TFloatField;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure tb0Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure dbg1SortMarkingChanged(Sender: TObject);
+    procedure dbg1GetCellParams(Sender: TObject; Column: TColumnEh;
+      AFont: TFont; var Background: TColor; State: TGridDrawState);
+    procedure dbg2SortMarkingChanged(Sender: TObject);
+    procedure ed1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure tb4Click(Sender: TObject);
+    procedure dbg3SortMarkingChanged(Sender: TObject);
+    procedure dbg1DblClick(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure cb1Click(Sender: TObject);
+    procedure ed2KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormActivate(Sender: TObject);
+    procedure sb1Click(Sender: TObject);
+    procedure tb5Click(Sender: TObject);
+    procedure dbt1BuildNode(Sender: TObject; StateFieldValue: Variant;
+      var StateImage: Integer);
+    procedure N4Click(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure N6Click(Sender: TObject);
+    procedure Excel1Click(Sender: TObject);
+    procedure Excel2Click(Sender: TObject);
+  private
+    FTXT: string;
+    procedure OpenEst;
+    procedure OpenMat;
+    procedure OpenOper;
+    procedure FindTreeItem(Citm: integer);
+    procedure OpenC_ORD;
+    { Private declarations }
+  public
+    C_ESTIMATE: integer;
+    C_ORDER: integer;
+    C_PRODUCT: integer;
+    { Public declarations }
+  end;
+
+var
+  fmEst: TfmEst;
+
+implementation
+uses unMain, unIS, unREP, unProduct, uAll;
+
+const
+  id_Form = 28;
+
+{$R *.dfm}
+
+procedure TfmEst.OpenC_ORD;
+begin
+  with qC_ORD do
+  begin
+    Close;
+    ParamByName('c_ord').AsInteger := C_ORDER;
+    Open;
+    p5.Visible := not IsEmpty;
+  end;
+end;
+
+procedure TfmEst.FindTreeItem(Citm: integer);
+var
+  i: integer;
+begin
+  with dmIS.qIN, dmIS.qIN.SQL do
+  begin
+    Close;
+    Clear;
+    Add('select ID from BR_UP_ITEMS(:ci1,1)');
+    ParamByName('ci1').AsInteger := Citm;
+    Open;
+    Last;
+    i := 0;
+    while not BOF do
+    begin
+      Prior;
+      dbt1.Items[i].Expand(False);
+      for i := i to dbt1.Items.Count - 1 do
+      begin
+        if Integer(dbt1.Items[i].Data) = FieldByName('ID').AsInteger then
+          break;
+      end;
+      if Integer(dbt1.Items[i].Data) = Citm then
+      begin
+        dbt1.Selected := dbt1.Items[i];
+        exit;
+      end;
+    end;
+  end;
+end;
+
+procedure TfmEst.OpenEst;
+begin
+  Screen.Cursor := crHourGlass;
+  with qEst, qEst.SQL do
+  begin
+    if Active then
+      C_ESTIMATE := qEstID_ESTIMATE.AsInteger;
+    Close;
+    Clear;
+    Add('select distinct e.id_estimate, e.id_version, e.name,');
+    Add('e.d_create, e.id_creator, e.d_confirm, e.id_confirm, e.amount,');
+    Add('e.price_date, e.sum_nds, e.price_delivery,');
+    add('(select nds_val from get_nds_sum(e.price_delivery,1)) price_delivery_bez_nds,');
+    add('e.price_tools,');
+    add('(select nds_val from get_nds_sum(e.price_tools,1)) price_tools_bez_nds,');
+    Add('e.profit, e.id_doc, p.fio, r.fio conf, i.id_item, i.name nprod, e.dop_price');
+    Add('from estimates e join product_objects b ');
+    Add('on b.id_version = e.id_version and b.id_parent = 0 and  coalesce(e.estimate_type,0) <> 1');
+    if cb1.Checked then
+      Add('and b.id_product = '
+        + IntToStr(dbt1.GetId));
+    Add('join items i on i.id_item = b.id_product');
+    Add('left join personnel p on p.id_p = e.id_creator');
+    Add('left join personnel r on r.id_p = e.id_confirm');
+    Add('where 1=1');
+    if tb2.Down then
+      Add('and e.d_confirm is not null');
+    if lcb1.KeyValue <> null then
+      Add('and e.id_creator = '
+        + IntToStr(lcb1.KeyValue));
+    if not VarIsNull(dtp1.Value) then
+    begin
+      Add('and ((e.d_create >= :d1) )');
+      ParamByName('d1').AsDate := Int(TDateTime(dtp1.Value));
+    end;
+
+    if not VarIsNull(dtp2.Value) then
+    begin
+      Add('and (e.d_create < :d2 + 1)');
+      ParamByName('d2').AsDate := Int(TDateTime(dtp2.Value));
+    end;
+    Add(OrdBy(dbg1));
+    Open;
+    Locate('ID_ESTIMATE', C_ESTIMATE, []);
+    OpenMat;
+    OpenOper;
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmEst.OpenMat;
+begin
+  with qMat, qMat.SQL do
+  begin
+    Close;
+    Clear;
+    if fmMain.S19 <> 1 then
+    begin
+      Add('select s.id_obj, i.name, u.name uname, s.price,');
+      //Add('sum(s.amount) amount, sum(s.summa) summa');
+
+      Add('(select nds_val from get_nds_sum(s.price,1 )) price_bez_nds,');
+      add('sum(s.amount) amount, sum(s.summa) summa,');
+      Add('(select nds_val from get_nds_sum( sum(s.summa),1)) summa_bez_nds');
+      Add('from estimate_pos s join items i on i.id_item = s.id_obj');
+      Add('join units u on u.id_unit = s.id_unit');
+      Add('where s.id_estimate = :id_estimate and s.obj_type = 1');
+      Add('group by s.id_obj, i.name, u.name, s.price');
+    end;
+    if fmMain.S19 = 1 then
+    begin
+      Add('select s.id_item id_obj,i.name ,u.name uname,');
+      Add('sum(s.full_amount) amount,');
+      Add('case when sum(s.full_amount) > 0 then');
+      //  Add('
+      add('sum((s.total/s.full_amount)*');
+      add('(s.full_amount - coalesce(s.comm_amount,0)))');
+      Add('else 0 end summa,');
+
+      Add('case when sum(s.full_amount) > 0 then');
+      Add('(select nds_val from get_nds_sum(');
+      add('sum((s.total/s.full_amount)*');
+      add('(s.full_amount - coalesce(s.comm_amount,0))),1))');
+      Add('else 0 end summa_bez_nds,');
+      add('case when sum(s.full_amount) > 0 then ');
+      Add('sum((s.total/s.full_amount)*(s.full_amount - coalesce(s.comm_amount,0))/s.full_amount)');
+      Add('else 0 end price,');
+      Add('(select nds_val from get_nds_sum(');
+      add('case when sum(s.full_amount) > 0 then ');
+      Add('sum((s.total/s.full_amount)*(s.full_amount - coalesce(s.comm_amount,0))/s.full_amount)');
+      Add('else 0 end,1)) price_bez_nds');
+      Add('from est_pos s ');
+      Add('join items i on i.id_item = s.id_item ');
+      Add('left join units u on u.id_unit = s.id_unit ');
+      Add('where s.id_estimate = :id_estimate and coalesce(s.full_amount,0) > 0 ');
+      Add('group by s.id_item ,i.name ,u.name ');
+    end;
+    Add(OrdBy(dbg2));
+    Open;
+
+  end
+end;
+
+procedure TfmEst.OpenOper;
+begin
+  with qOper, qOper.SQL do
+  begin
+    Close;
+    Clear;
+    if fmMain.S19 <> 1 then
+    begin
+      Add('select s.id_obj, o.name, u.name uname, s.price, ');
+      add('(select nds_val from get_nds_sum(s.price,1)) price_bez_nds,');
+      Add('sum(s.amount) amount,');
+      add('sum(s.summa) summa, ');
+      add('(select nds_val from get_nds_sum(sum(s.summa),1)) summa_bez_nds,');
+      add('sum(s.amount_time) amount_time');
+      Add('from estimate_pos s join product_oper p on p.id_prod_oper = s.id_obj');
+      Add('join operations o on o.id_area = p.id_area');
+      Add('and o.id_operation = p.id_operation');
+      Add('join units u on u.id_unit = s.id_unit');
+      Add('where s.id_estimate = :id_estimate and s.obj_type = 2');
+      Add('group by s.id_obj, o.name, u.name, s.price');
+    end;
+    if fmMain.S19 = 1 then
+    begin
+      Add('select s.id_object id_obj, o.name,u.name uname,');
+      Add('sum(s.full_amount) amount, sum(s.amount_time) amount_time,');
+      add('sum(s.total) summa,');
+      Add('(select nds_val from get_nds_sum(sum(s.total),1)) summa_bez_nds,');
+      add('sum(s.total/s.full_amount)  price,');
+      add('(select nds_val from get_nds_sum(sum(s.total/s.full_amount),1))  price_bez_nds');
+      Add('from est_pos s');
+      Add('left join units u on u.id_unit = s.id_unit');
+      Add('join product_oper p on p.id_prod_oper = s.id_prod_oper');
+      Add('join operations o on o.id_area = p.id_area and o.id_operation = p.id_operation');
+      Add('where s.id_estimate = :id_estimate and s.id_item is null');
+      Add('group by s.id_object, o.name,u.name');
+    end;
+    Add(OrdBy(dbg3));
+    Open;
+  end;
+end;
+
+procedure TfmEst.FormCreate(Sender: TObject);
+begin
+  C_ESTIMATE := 0;
+  C_ORDER := 0;
+  C_PRODUCT := 0;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read(Self, iniForm);
+    Read(p2, iniRect);
+  finally
+    Free;
+  end;
+  pc1.ActivePage := ts1;
+end;
+
+procedure TfmEst.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  qMat.Close;
+  qOper.Close;
+  qEst.Close;
+  qFIO.Close;
+  qC_ORD.Close;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Write(Self, iniForm);
+    Write(p2, iniRect);
+  finally
+    Free;
+  end;
+end;
+
+procedure TfmEst.tb0Click(Sender: TObject);
+begin
+  OpenEst;
+end;
+
+procedure TfmEst.FormShow(Sender: TObject);
+begin
+  qFIO.Close;
+  qFIO.Open;
+  OpenC_ORD;
+  with dbt1 do
+  begin
+    ClearTree;
+    BuildTree;
+    if C_PRODUCT > 0 then
+    begin
+      p3.Width := 250;
+      FindTreeItem(C_PRODUCT);
+    end
+    else
+    begin
+      if cb1.Checked then
+        p3.Width := 250
+      else
+        p3.Width := 1;
+      Items[0].Expand(False);
+      Selected := Items[0];
+    end;
+  end;
+  dtp1.Value := now - 1;
+  dtp2.Value := now;
+
+  tb3.visible := not fmMain.UF143;
+  tb6.visible := not fmMain.UF143;
+
+  OpenEst;
+end;
+
+procedure TfmEst.dbg1SortMarkingChanged(Sender: TObject);
+begin
+  OpenEst;
+end;
+
+procedure TfmEst.dbg1GetCellParams(Sender: TObject; Column: TColumnEh;
+  AFont: TFont; var Background: TColor; State: TGridDrawState);
+begin
+  if not qEstD_CONFIRM.IsNull then
+    Background := clMoneyGreen;
+end;
+
+procedure TfmEst.dbg2SortMarkingChanged(Sender: TObject);
+begin
+  OpenMat;
+end;
+
+procedure TfmEst.ed1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  FindGridValue(dbg1, ed1, Key, 'ID_ESTIMATE');
+end;
+
+procedure TfmEst.tb4Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if qEstID_DOC.IsNull then
+    MsgInformation('Ссылка на документ отсутствует',
+      'Проверка')
+  else
+  begin
+    {  if not dmIS.dbDOC.Connected then
+      try
+        dmIS.dbDOC.Connected := True;
+        //fmMain.StoreDoc(0,qEstID_DOC.AsInteger,'',dmIS.qR_BODY);
+        if not Assigned(fmAll) then
+          Application.CreateForm(TfmAll, fmAll);
+
+        Old_DocBody(qEstID_DOC.AsIntegefr, 0, ''); // переход на новую базу документов
+        //fmAll.StoreDoc_r(qEstID_DOC.AsInteger);
+
+        dmIS.dbDOC.Connected := False;
+      except
+        MsgError('Нет связи с базой документов', 'Соединение с базой данных');
+      end;    }
+  end;
+end;
+
+procedure TfmEst.dbg3SortMarkingChanged(Sender: TObject);
+begin
+  OpenOper;
+end;
+
+procedure TfmEst.dbg1DblClick(Sender: TObject);
+var
+  OBJ_PROD: integer;
+begin
+  if qEst.IsEmpty then
+    exit;
+  with dmIS.qIN, dmIS.qIN.SQL do
+  begin
+    Close;
+    Clear;
+    Add('select id_object from product_objects');
+    Add('where (id_version = :v1) and (id_parent = 0) and (id_item is not null)');
+    Add('and ((obj_kind is null) or (obj_kind = 0))');
+    ParamByName('v1').AsInteger := qEstID_VERSION.AsInteger;
+    Open;
+    if not IsEmpty then
+    begin
+      OBJ_PROD := FieldByName('id_object').AsInteger;
+      if not Assigned(fmProduct) then
+        Application.CreateForm(TfmProduct, fmProduct);
+      fmProduct.Caption :=
+        'Конструкторско-технологическая спецификация изделия';
+      fmProduct.C_OBJ := OBJ_PROD;
+      fmProduct.ShowModal;
+    end;
+  end;
+end;
+
+procedure TfmEst.N1Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  {If not Assigned(fmRep) Then Application.CreateForm(TfmRep,fmRep);
+  with fmREP do begin
+   qR_EST.Close;
+   qR_EST.ParamByName('id_estimate').asInteger := fmEst.qEstID_ESTIMATE.AsInteger;
+   qR_EST.ParamByName('obj_kind').Clear;
+   qR_EST.Open;
+   rR_EST.Script.Variables['Est_Title'] := 'Смета';
+   rR_EST.ShowReport;
+  end;}
+
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  fmAll.GetEstRep(fmEst.qEstID_ESTIMATE.AsInteger, 1, fmMain.s19);
+end;
+
+procedure TfmEst.N2Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if not Assigned(fmRep) then
+    Application.CreateForm(TfmRep, fmRep);
+  with fmREP do
+  begin
+    qR_EST.Close;
+    qR_EST.ParamByName('id_estimate').asInteger :=
+      fmEst.qEstID_ESTIMATE.AsInteger;
+    qR_EST.ParamByName('obj_kind').AsInteger := 1;
+    qR_EST.Open;
+    if qR_EST.IsEmpty then
+      MsgInformation('Данные по оснастке отсутствуют',
+        'Выборка данных')
+    else
+    begin
+      rR_EST.Script.Variables['Est_Title'] := 'Смета на оснастку';
+      rR_EST.ShowReport;
+    end;
+  end;
+end;
+
+procedure TfmEst.N3Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if not Assigned(fmRep) then
+    Application.CreateForm(TfmRep, fmRep);
+  with fmREP do
+  begin
+    qR_EST.Close;
+    qR_EST.ParamByName('id_estimate').asInteger :=
+      fmEst.qEstID_ESTIMATE.AsInteger;
+    qR_EST.ParamByName('obj_kind').AsInteger := 2;
+    qR_EST.Open;
+    if qR_EST.IsEmpty then
+      MsgInformation('Данные по упаковке отсутствуют',
+        'Выборка данных')
+    else
+    begin
+      rR_EST.Script.Variables['Est_Title'] := 'Смета на упаковку';
+      rR_EST.ShowReport;
+    end;
+  end;
+end;
+
+procedure TfmEst.cb1Click(Sender: TObject);
+begin
+  if cb1.Checked then
+    p3.Width := 250
+  else
+    p3.Width := 1;
+end;
+
+procedure TfmEst.ed2KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if Key = 13 then
+  try
+    FTXT := ed2.Text;
+    if FTXT[1] = '*' then
+    begin
+      delete(FTXT, 1, 1);
+      C_PRODUCT := StrToInt(FTXT);
+    end
+    else
+      with dmIS.qIN, dmIS.qIN.SQL do
+      begin
+        Close;
+        Clear;
+        Add('select i.id_item from ITEMS i join br_items(4,0) b');
+        Add('on b.id = i.id_item where i.status <> 3');
+        Add('and upper(i.name) like upper(''' + ed2.Text + '%'')');
+        Open;
+        if not IsEmpty then
+          C_PRODUCT := FieldByName('ID_ITEM').AsInteger
+        else
+          C_PRODUCT := 0;
+      end;
+    FindTreeItem(C_PRODUCT);
+  except
+    MsgInformation('Образец не найден', 'Поиск по образцу');
+  end;
+end;
+
+procedure TfmEst.FormActivate(Sender: TObject);
+begin
+  tb3.Enabled := fmMain.UF64 and (not qEst.IsEmpty);
+  tb5.Enabled := fmMain.UF71 and (C_ORDER > 0) and (not qEst.IsEmpty);
+  sb1.Enabled := fmMain.UF71 and (C_ORDER > 0);
+  if fmmain.uf143 then
+  begin
+    fmAll.HideGridCOl(dbg1,
+      'PRICE_DELIVERY,PRICE_DELIVERY_BEZ_NDS,PRICE_TOOLS,PRICE_TOOLS_BEZ_NDS,PROFIT',
+      false);
+    fmAll.HideGridCOl(dbg2, 'PRICE,PRICE_BEZ_NDS,SUMMA,SUMMA_BEZ_NDS', false);
+    fmAll.HideGridCOl(dbg3, 'PRICE,PRICE_BEZ_NDS,SUMMA,SUMMA_BEZ_NDS', false);
+  end;
+end;
+
+procedure TfmEst.sb1Click(Sender: TObject);
+var
+  np: string;
+begin
+  if (C_ORDER <= 0) then
+    exit;
+  if qC_ORD.IsEmpty then
+    exit;
+  if (qC_ORDSTATUS.AsInteger > 19) and (not qC_ORDID_PRODUCT.IsNull) then
+  begin
+    MsgInformation('Нельзя изменить изделие утвержденного заказа',
+      'Проверка статуса');
+    exit;
+  end;
+  np := '';
+  if dbt1.Selected.AbsoluteIndex > 0 then
+    np := 'Изделие ' + IntToStr(dbt1.GetId) +
+      ' - ' + dbt1.Selected.Text + ' будет изделием заказа ' +
+      qC_ORDN_ORDER.AsString + ' - ' + qC_ORDNAME.AsString +
+      '. Привязать изделие?';
+  if qC_ORDID_PRODUCT.isNull then
+    if C_PRODUCT > 0 then
+      np := 'Замена изделия. ' + np;
+  if MsgQuestion(np, 'Изменение изделия в заказе.') = id_yes then
+    with dmIS.qIM, dmIS.qIM.SQL do
+    begin
+      Close;
+      Clear;
+      Add('update PROJECT_ORDS SET ID_PRODUCT = :prd1');
+      Add('where ID_ORDER = :ord1');
+      ParamByName('prd1').AsInteger := dbt1.GetID;
+      ParamByName('ord1').AsInteger := C_ORDER;
+      try
+        ExecSQL;
+        if Transaction.Active then
+          Transaction.Commit;
+        OpenC_ORD;
+      except;
+        MsgError('Ошибка при записи изделия', 'Ошибка');
+        if Transaction.Active then
+          Transaction.Rollback;
+      end;
+    end;
+end;
+
+procedure TfmEst.tb5Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if qC_ORD.IsEmpty then
+    exit;
+  if (qC_ORDSTATUS.AsInteger > 19) and (not qC_ORDID_ESTIMATE.IsNull) then
+  begin
+    MsgInformation('Нельзя изменить смету утвержденного заказа', 'Проверка');
+    exit;
+  end;
+  if qEstD_CONFIRM.IsNull then
+  begin
+    MsgInformation('Смета № ' + qEstID_ESTIMATE.AsString + ' не утверждена.',
+      'Проверка утверждения сметы');
+    exit;
+  end;
+  if C_ORDER > 0 then
+    if MsgQuestion('Смета №: ' + qEstID_ESTIMATE.AsString +
+      ' будет связана с заказом - ' + qC_ORDNAME.AsString + ' (' +
+      qC_ORDN_ORDER.AsString + ' ). Привязать смету?',
+      'Изменение № сметы в заказе.') = id_yes then
+      with dmIS.qIM, dmIS.qIM.SQL do
+      begin
+        Close;
+        Clear;
+        Add('update PROJECT_ORDS SET ID_PRODUCT = :prd1, ID_ESTIMATE = :est1 ');
+        Add('where ID_ORDER = :ord1');
+        ParamByName('prd1').AsInteger := qEstID_ITEM.AsInteger;
+        ParamByName('est1').AsInteger := qEstID_ESTIMATE.AsInteger;
+        ParamByName('ord1').AsInteger := C_ORDER;
+        try
+          ExecSQL;
+          if Transaction.Active then
+            Transaction.Commit;
+          OpenC_ORD;
+        except;
+          MsgError('Ошибка при записи номера сметы', 'Ошибка');
+          if Transaction.Active then
+            Transaction.Rollback;
+        end;
+      end;
+end;
+
+procedure TfmEst.dbt1BuildNode(Sender: TObject; StateFieldValue: Variant;
+  var StateImage: Integer);
+begin
+  StateImage := StateFieldValue;
+end;
+
+procedure TfmEst.N4Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  fmAll.GetEstRep(fmEst.qEstID_ESTIMATE.AsInteger, 0, fmMain.s19);
+end;
+
+procedure TfmEst.N5Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  fmAll.Est_Excel(qEstID_ESTIMATE.AsInteger, 1);
+end;
+
+procedure TfmEst.N6Click(Sender: TObject);
+begin
+  if qEst.IsEmpty then
+    exit;
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  fmAll.Est_Excel(qEstID_ESTIMATE.AsInteger, 0);
+end;
+
+procedure TfmEst.Excel1Click(Sender: TObject);
+begin
+  GridToExcel(dbg1);
+
+end;
+
+procedure TfmEst.Excel2Click(Sender: TObject);
+begin
+  GridToExcel(dbg1);
+end;
+
+end.

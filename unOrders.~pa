@@ -1,0 +1,1249 @@
+unit unOrders;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ExtCtrls, ComCtrls, ToolWin, ShrFunc, unMainForm, DBCtrls,
+  Grids, DBGridEh, StdCtrls, IBQuery, Buttons, Mask, DBCtrlsEh, DBLookupEh,
+  DB, IBCustomDataSet, Menus, frxClass, frxDBSet;
+
+type
+  TfmOrders = class(TMainForm)
+    clb1: TCoolBar;
+    p1: TPanel;
+    dbg1: TDBGridEh;
+    dbn1: TDBNavigator;
+    Panel2: TPanel;
+    pc1: TPageControl;
+    ts1: TTabSheet;
+    ts2: TTabSheet;
+    ts3: TTabSheet;
+    Panel3: TPanel;
+    ts4: TTabSheet;
+    sb0: TSpeedButton;
+    GroupBox1: TGroupBox;
+    sb1: TSpeedButton;
+    sb2: TSpeedButton;
+    sb3: TSpeedButton;
+    cbx1: TComboBox;
+    GroupBox2: TGroupBox;
+    lb3: TLabel;
+    lb2: TLabel;
+    dtp1: TDateTimePicker;
+    dtp2: TDateTimePicker;
+    cbx2: TComboBox;
+    Label3: TLabel;
+    lcb1: TDBLookupComboboxEh;
+    Label4: TLabel;
+    lcb2: TDBLookupComboboxEh;
+    Label5: TLabel;
+    lcb3: TDBLookupComboboxEh;
+    Label6: TLabel;
+    lcb4: TDBLookupComboboxEh;
+    Label7: TLabel;
+    lcb5: TDBLookupComboboxEh;
+    Label8: TLabel;
+    lcb6: TDBLookupComboboxEh;
+    p2: TPanel;
+    Splitter2: TSplitter;
+    p3: TPanel;
+    dbg4: TDBGridEh;
+    dbn3: TDBNavigator;
+    pc2: TPageControl;
+    ss1: TTabSheet;
+    dbg3: TDBGridEh;
+    ss2: TTabSheet;
+    dbm1: TDBMemo;
+    ss3: TTabSheet;
+    dbn2: TDBNavigator;
+    dbg5: TDBGridEh;
+    Splitter1: TSplitter;
+    Label9: TLabel;
+    Label10: TLabel;
+    lcb7: TDBLookupComboboxEh;
+    lcb8: TDBLookupComboboxEh;
+    qOrders: TIBQuery;
+    qOrdersID_ORDER: TIntegerField;
+    qOrdersN_ORDER: TIBStringField;
+    qOrdersNAME: TIBStringField;
+    qOrdersAMOUNT: TIBBCDField;
+    qOrdersSUMPRICE: TIBBCDField;
+    qOrdersAGENT: TIBStringField;
+    qOrdersD_OPEN: TDateTimeField;
+    qOrdersD_READY: TDateField;
+    qOrdersD_CONSTR: TDateField;
+    qOrdersD_CLOSE: TDateTimeField;
+    qOrdersSTATUS: TIntegerField;
+    qOrdersID_CPROD: TIntegerField;
+    qOrdersID_CPTYPE: TIntegerField;
+    qOrdersTPNAME: TIBStringField;
+    qOrdersPRODNAME: TIBStringField;
+    qOrdersPA_OUT: TIBStringField;
+    qOrdersSTOTE: TIBStringField;
+    qOrdersMANAGER: TIBStringField;
+    qOrdersDESIGNER: TIBStringField;
+    qOrdersCONSTR: TIBStringField;
+    dsOrders: TDataSource;
+    qOrdersID_AGENT: TIntegerField;
+    qOrdersNCURR: TIBStringField;
+    qOrdersNSTSTUS: TStringField;
+    tlb1: TToolBar;
+    tb1: TToolButton;
+    ToolButton2: TToolButton;
+    qMAN: TIBQuery;
+    qMANID_P: TIntegerField;
+    qMANFIO: TIBStringField;
+    dsMAN: TDataSource;
+    qPROD: TIBQuery;
+    qTPR: TIBQuery;
+    dsPROD: TDataSource;
+    dsTPR: TDataSource;
+    qPRODID_P_AREA: TIntegerField;
+    qPRODNAME: TIBStringField;
+    qTPRID_PTYPE: TIntegerField;
+    qTPRNAME: TIBStringField;
+    dsAGENTS: TDataSource;
+    qAGENTS: TIBQuery;
+    qAGENTSID_ITEM: TIntegerField;
+    qAGENTSNAME: TIBStringField;
+    qDEZ: TIBQuery;
+    qCONSTR: TIBQuery;
+    dsDEZ: TDataSource;
+    dsCONSTR: TDataSource;
+    qDEZID_P: TIntegerField;
+    qDEZFIO: TIBStringField;
+    qCONSTRID_P: TIntegerField;
+    qCONSTRFIO: TIBStringField;
+    lb1: TListBox;
+    Label32: TLabel;
+    ed1: TEdit;
+    qPA_OUT: TIBQuery;
+    qSTORE: TIBQuery;
+    dsPA_OUT: TDataSource;
+    dsSTORE: TDataSource;
+    qPA_OUTID_P_AREA: TIntegerField;
+    qPA_OUTNAME: TIBStringField;
+    qSTOREID_P_AREA: TIntegerField;
+    qSTORENAME: TIBStringField;
+    qOrdersF_CONSTR: TDateTimeField;
+    qOrdersREM: TMemoField;
+    qOrdersD_REJECT: TDateTimeField;
+    pc3: TPageControl;
+    hs1: TTabSheet;
+    hs2: TTabSheet;
+    hs3: TTabSheet;
+    Panel1: TPanel;
+    Label11: TLabel;
+    DBText1: TDBText;
+    Label12: TLabel;
+    DBText2: TDBText;
+    DBText3: TDBText;
+    Label14: TLabel;
+    Label15: TLabel;
+    DBText6: TDBText;
+    Label16: TLabel;
+    DBText7: TDBText;
+    Bevel1: TBevel;
+    Label17: TLabel;
+    DBText8: TDBText;
+    Label18: TLabel;
+    DBText11: TDBText;
+    Label19: TLabel;
+    Label20: TLabel;
+    DBText13: TDBText;
+    DBText19: TDBText;
+    Label21: TLabel;
+    DBText9: TDBText;
+    Label22: TLabel;
+    DBText10: TDBText;
+    Label23: TLabel;
+    DBText20: TDBText;
+    DBText12: TDBText;
+    Label24: TLabel;
+    DBText15: TDBText;
+    Label31: TLabel;
+    DBText22: TDBText;
+    Label25: TLabel;
+    DBText16: TDBText;
+    DBText5: TDBText;
+    DBText14: TDBText;
+    DBText17: TDBText;
+    Label26: TLabel;
+    DBText18: TDBText;
+    Label27: TLabel;
+    DBText21: TDBText;
+    DBText23: TDBText;
+    Label29: TLabel;
+    DBText26: TDBText;
+    DBText27: TDBText;
+    PopupMenu1: TPopupMenu;
+    N1: TMenuItem;
+    N3: TMenuItem;
+    ToolBar1: TToolBar;
+    kb1: TToolButton;
+    ToolButton3: TToolButton;
+    kb2: TToolButton;
+    kb3: TToolButton;
+    qOrdersID_DOC: TIntegerField;
+    qOrdersID_PROJECT: TIntegerField;
+    qOrdersID_PRODUCT: TIntegerField;
+    qOrdersID_ESTIMATE: TIntegerField;
+    qOrdersID_VERSION: TIntegerField;
+    qORD_SUM_PACK: TIBQuery;
+    IntegerField1: TIntegerField;
+    IBStringField1: TIBStringField;
+    IBStringField2: TIBStringField;
+    IBBCDField1: TIBBCDField;
+    IntegerField2: TIntegerField;
+    IBBCDField2: TIBBCDField;
+    IBStringField3: TIBStringField;
+    IBStringField4: TIBStringField;
+    DateTimeField1: TDateTimeField;
+    DateField1: TDateField;
+    DateField2: TDateField;
+    DateTimeField2: TDateTimeField;
+    IntegerField3: TIntegerField;
+    IntegerField4: TIntegerField;
+    IntegerField5: TIntegerField;
+    IBStringField5: TIBStringField;
+    IBStringField6: TIBStringField;
+    IBStringField7: TIBStringField;
+    IBStringField8: TIBStringField;
+    IBStringField9: TIBStringField;
+    IBStringField10: TIBStringField;
+    IBStringField11: TIBStringField;
+    DateTimeField3: TDateTimeField;
+    MemoField1: TMemoField;
+    DateTimeField4: TDateTimeField;
+    IntegerField6: TIntegerField;
+    IntegerField7: TIntegerField;
+    IntegerField8: TIntegerField;
+    IntegerField9: TIntegerField;
+    IntegerField10: TIntegerField;
+    StringField1: TStringField;
+    qORD_SUM_PACKPRODUSED: TFloatField;
+    qORD_SUM_PACKRECEIVE: TFloatField;
+    qORD_SUM_PACKSHIP: TFloatField;
+    qORD_SUM_PACKSPRODUCED: TFloatField;
+    qORD_SUM_PACKSRECIEVED: TFloatField;
+    qORD_SUM_PACKSSHIPPED: TFloatField;
+    dbdSUM_PACK: TfrxDBDataset;
+    rSUM_PACK: TfrxReport;
+    tb2: TToolButton;
+    PopupMenu2: TPopupMenu;
+    N2: TMenuItem;
+    cb1: TCheckBox;
+    cb2: TCheckBox;
+    cb3: TCheckBox;
+    cb4: TCheckBox;
+    cb5: TCheckBox;
+    cb6: TCheckBox;
+    cb7: TCheckBox;
+    qOrdersCHARGE: TIntegerField;
+    qOrdersOS: TIntegerField;
+    qOrdersDEF_SUM: TFloatField;
+    qOrdersTOTAL_PAYMENT: TFloatField;
+    qOrdersDEBT: TFloatField;
+    cb8: TCheckBox;
+    qOrdersLAST_SHIP: TDateField;
+    qOrdersSHIP: TFloatField;
+    qOrdersSUMSHIP: TFloatField;
+    qOrdersS_SHIP: TFloatField;
+    qORD_SUM_PACKDEF_SUM: TFloatField;
+    qORD_SUM_PACKTOTAL_PAYMENT: TFloatField;
+    qORD_SUM_PACKLAST_SHIP: TDateField;
+    qORD_SUM_PACKS_SHIP: TFloatField;
+    qORD_SUM_PACKDEBT: TFloatField;
+    rDebt: TfrxReport;
+    dBDDebt: TfrxDBDataset;
+    N4: TMenuItem;
+    qOrds_p: TIBQuery;
+    dsOrds_p: TDataSource;
+    ss4: TTabSheet;
+    dbg6: TDBGridEh;
+    qOrds_pID_PACKPOS: TIntegerField;
+    qOrds_pID_ORDER: TIntegerField;
+    qOrds_pID_C: TIntegerField;
+    qOrds_pD_PACK: TDateTimeField;
+    qOrds_pD_ACCEPT: TDateTimeField;
+    qOrds_pSHIP: TFloatField;
+    qOrds_pPAY: TFloatField;
+    rManDebt: TfrxReport;
+    N5: TMenuItem;
+    SpeedButton1: TSpeedButton;
+    ToolButton1: TToolButton;
+    qOrdersNAME_ORD_TYPE: TIBStringField;
+    qOrdersEST_TOTAL_SUM_PEO: TFloatField;
+    qOrdersEST_TOTAL_SUM_KD: TFloatField;
+    pmEstExc: TPopupMenu;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    N8: TMenuItem;
+    qOrdersID_ESTIMATE_KD: TIntegerField;
+    ToolButton4: TToolButton;
+    cbKD: TCheckBox;
+    ToolButton5: TToolButton;
+    cbPEO: TCheckBox;
+    qOrdersID_VERSION_PEO: TIntegerField;
+    qOrdersIS_RESERVE: TIntegerField;
+    pnCli: TPanel;
+    lcbAg: TDBLookupComboboxEh;
+    Label1: TLabel;
+    Label2: TLabel;
+    lcbProj: TDBLookupComboboxEh;
+    dsAgent: TDataSource;
+    qAgent: TIBQuery;
+    qAgentID_ITEM: TIntegerField;
+    qAgentNAME: TIBStringField;
+    dsProj: TDataSource;
+    qProj: TIBQuery;
+    qProjID_PROJECT: TIntegerField;
+    qProjID_AGENT: TIntegerField;
+    qProjNAME: TIBStringField;
+    qProjID_MANAGER: TIntegerField;
+    qProjFIO: TIBStringField;
+    BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    qIns: TIBQuery;
+    ToolButton7: TToolButton;
+    qOrdersDELIVERY_SUM: TFloatField;
+    qOrdersORDKIND: TIBStringField;
+    qOrdersdelivery_sum_bez_nds: TFloatField;
+    qOrds_pSHIP_BEZ_NDS: TFloatField;
+    qOrds_pPAY_BEZ_NDS: TFloatField;
+    Label13: TLabel;
+    DBText4: TDBText;
+    DBText24: TDBText;
+    ToolButton6: TToolButton;
+    cbRej: TCheckBox;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormShow(Sender: TObject);
+    procedure sb0Click(Sender: TObject);
+    procedure dbg1SortMarkingChanged(Sender: TObject);
+    procedure qOrdersCalcFields(DataSet: TDataSet);
+    procedure tb1Click(Sender: TObject);
+    procedure ed1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure kb2Click(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure kb3Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure dbg1GetCellParams(Sender: TObject; Column: TColumnEh;
+      AFont: TFont; var Background: TColor; State: TGridDrawState);
+    procedure pc3Change(Sender: TObject);
+    procedure cbx2CloseUp(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+    procedure ToolButton1Click(Sender: TObject);
+    procedure N6Click(Sender: TObject);
+    procedure N7Click(Sender: TObject);
+    procedure N8Click(Sender: TObject);
+    procedure ToolButton4Click(Sender: TObject);
+    procedure cbPEOClick(Sender: TObject);
+    procedure cbKDClick(Sender: TObject);
+    procedure lcbAgCloseUp(Sender: TObject; Accept: Boolean);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure ToolButton7Click(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+    procedure cb3Click(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+  private
+    C_ORD, C_MAN: integer;
+    procedure OpenOrder;
+    procedure ReadSelection;
+    procedure OpenSumPack(SortType: word);
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmOrders: TfmOrders;
+
+implementation
+uses unMain, unIS, unREP, unCliOrds, uAll, unOperRoute;
+
+const
+  id_Form = 27;
+
+{$R *.dfm}
+
+procedure TfmOrders.ReadSelection;
+var
+  s: string;
+begin
+  lb1.Clear;
+  if cb1.Checked then
+    lb1.Items.Add('Незавершенные');
+  if cb2.Checked then
+    lb1.Items.Add('Завершенные');
+  if cb3.Checked then
+    lb1.Items.Add('Отвергнутые');
+  if cb6.Checked then
+    lb1.Items.Add('Основные средства');
+  if cb7.Checked then
+    lb1.Items.Add('Есть комиссионные');
+  if cb8.Checked then
+    lb1.Items.Add('Не полностью оплаченные');
+  s := '';
+  if cbx1.ItemIndex > 0 then
+  begin
+    s := 'Статус ';
+    if sb1.Down then
+      s := s + ' = ';
+    if sb2.Down then
+      s := s + ' > ';
+    if sb3.Down then
+      s := s + ' < ';
+    s := s + cbx1.Text;
+  end;
+  if s <> '' then
+    lb1.Items.Add(s);
+  s := '';
+  if cbx2.ItemIndex > 0 then
+  begin
+    case cbx2.ItemIndex of
+      1: s := 'Дата создания c ';
+      2: s := 'Дата конструкции c ';
+      3: s := 'Дата выполнения c ';
+      4: s := 'Дата завершения c ';
+      5: s := 'Дата последней отгрузки c ';
+    end;
+    s := s + DateToStr(dtp1.Date) + '  по ' + DateToStr(dtp2.Date);
+  end;
+  if s <> '' then
+    lb1.Items.Add(s);
+  if lcb1.KeyValue <> NULL then
+    lb1.Items.Add('Производство: ' + qPRODNAME.AsString);
+  if lcb2.KeyValue <> NULL then
+    lb1.Items.Add('Тип продукции: ' + qTPRNAME.AsString);
+  if lcb3.KeyValue <> NULL then
+    lb1.Items.Add('Менеджер: ' + qMANFIO.AsString);
+  if lcb4.KeyValue <> NULL then
+    lb1.Items.Add('Клиент: ' + qAGENTSNAME.AsString);
+  if lcb5.KeyValue <> NULL then
+    lb1.Items.Add('Дизайнер: ' + qDEZFIO.AsString);
+  if lcb6.KeyValue <> NULL then
+    lb1.Items.Add('Конструктор: ' + qCONSTRFIO.AsString);
+  if lcb7.KeyValue <> NULL then
+    lb1.Items.Add('Выпускающий участок: ' + qPA_OUTNAME.AsString);
+  if lcb8.KeyValue <> NULL then
+    lb1.Items.Add('Склад готовой продукции: ' + qSTORENAME.AsString);
+  pc1.ActivePage := ts1;
+end;
+
+procedure TfmOrders.OpenOrder;
+begin
+  if dmIS.mT.Active then
+    dmIS.mT.CommitRetaining;
+  Screen.Cursor := crHourGlass;
+  ReadSelection;
+  with qOrders, qOrders.SQL do
+  begin
+    if Active then
+      C_ORD := qOrdersID_ORDER.AsInteger;
+    Close;
+    Clear;
+    Add('select p.id_order, p.n_order, p.name, p.amount, p.id_agent,');
+    Add('(P.PRICE + P.PRICEA) SUMPRICE,');
+    Add('(select nds_val from get_nds_sum((P.PRICE + P.PRICEA),1)) SUMPRICE_bez_nds,');
+    Add('c.name NCURR, I.NAME AGENT,');
+    Add('p.d_open, p.d_ready, p.d_constr, p.d_close, p.status,');
+    Add('p.id_cprod, p.id_cptype, pt.name tpname, a.name prodname,');
+    Add('a1.name pa_out, a2.name stote, r1.fio manager, r2.fio designer,');
+    Add('r3.fio constr, p.f_constr, p.rem, p.d_reject,');
+    Add('p.id_doc, p.id_project, p.id_product, p.id_estimate, p.id_version,');
+    Add('coalesce(p.is_charge,0) charge , coalesce(p.is_os,0) os,');
+    Add('p.def_sum,');
+    Add('(select nds_val from get_nds_sum(p.def_sum,1)) def_sum_bez_nds,');
+    Add('p.total_payment,');
+    Add('(select nds_val from get_nds_sum(p.total_payment,1)) total_payment_bez_nds,');
+    Add('p.last_ship, p.ship,');
+    Add('(p.price + p.pricea)*coalesce(p.ship,0)/p.amount sumship,');
+    Add('(select nds_val from get_nds_sum((p.price + p.pricea)*coalesce(p.ship,0)/p.amount,1)) sumship_bez_nds,');
+    Add('coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount s_ship,');
+    Add('(select nds_val from get_nds_sum(coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount,1)) s_ship_bez_nds,');
+    Add('coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount');
+    Add('- coalesce(p.total_payment,0) debt,');
+    Add('(select nds_val from get_nds_sum(coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount');
+    Add('- coalesce(p.total_payment,0),1)) debt_bez_nds,');
+
+    Add('ot.name name_ord_type,');
+    Add('ee.total_sum est_total_sum_peo,');
+    Add('(select nds_val from get_nds_sum(ee.total_sum,1)) est_total_sum_peo_bez_nds,');
+    Add('e1.total_sum est_total_sum_kd,');
+    Add('(select nds_val from get_nds_sum(e1.total_sum,1)) est_total_sum_kd_bez_nds,');
+    Add('p.id_estimate_kd,ee.id_version id_version_peo, p.is_reserve, ');
+    Add('p.delivery_sum,');
+    Add('(select nds_val from get_nds_sum(p.delivery_sum,1)) delivery_sum_bez_nds,');
+    add(' k.name ordkind');
+    Add('from PROJECT_ORDS P ');
+    Add('left join ITEMS I on P.ID_AGENT = I.ID_ITEM');
+    Add('left join PROJECTS J on J.ID_PROJECT = P.ID_PROJECT ');
+    Add('left join ord_types ot on ot.id_type = p.ord_type ');
+    Add('join currency c on c.id_currency = p.id_currency');
+    Add('join ptypes pt on pt.id_ptype = p.id_cptype');
+    Add('join prod_areas a on a.id_p_area = p.id_cprod');
+    Add('left join prod_areas a1 on a1.id_p_area = p.id_pa_out');
+    Add('left join prod_areas a2 on a2.id_p_area = p.id_store');
+    Add('left join personnel r1 on r1.id_p = j.id_manager');
+    Add('left join personnel r2 on r2.id_p = j.id_designer');
+    Add('left join personnel r3 on r3.id_p = p.id_constr');
+    Add('left join estimates ee on ee.id_estimate = p.id_estimate');
+    Add('left join estimates e1 on e1.id_estimate = p.id_estimate_kd');
+    add('left join order_kinds k on k.id_ord_kind = p.ord_kind');
+    Add('where 1=1 ');
+    if cb1.Checked then
+      Add('and p.D_CLOSE is null');
+    if cb2.Checked then
+      Add('and p.D_CLOSE is not null');
+    if cb3.Checked then
+      Add('and p.D_REJECT is not null');
+    if cb6.Checked then
+      Add('and p.is_os is not null');
+    if cb7.Checked then
+      Add('and p.is_charge is not null');
+    if cbRej.Checked then
+      Add('and p.d_reject is null');
+
+    if cb8.Checked then
+      Add('and (coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount' +
+        ' > coalesce(p.total_payment,0))');
+    if lcb1.KeyValue <> NULL then
+    begin
+      Add('and P.ID_CPROD = :prod1');
+      ParamByName('prod1').AsInteger := lcb1.KeyValue;
+    end;
+    if lcb2.KeyValue <> NULL then
+    begin
+      Add('and P.ID_CPTYPE = :tp1');
+      ParamByName('tp1').AsInteger := lcb2.KeyValue;
+    end;
+    if lcb3.KeyValue <> NULL then
+    begin
+      Add('and J.ID_MANAGER = :man1');
+      ParamByName('man1').AsInteger := lcb3.KeyValue;
+    end;
+    if lcb4.KeyValue <> NULL then
+    begin
+      Add('and P.ID_AGENT = :ag1');
+      ParamByName('ag1').AsInteger := lcb4.KeyValue;
+    end;
+    if lcb5.KeyValue <> NULL then
+    begin
+      Add('and J.ID_DESIGNER = :dez1');
+      ParamByName('dez1').AsInteger := lcb5.KeyValue;
+    end;
+    if lcb6.KeyValue <> NULL then
+    begin
+      Add('and P.ID_CONSTR = :con1');
+      ParamByName('con1').AsInteger := lcb6.KeyValue;
+    end;
+    if lcb7.KeyValue <> NULL then
+    begin
+      Add('and P.ID_PA_OUT = :pao1');
+      ParamByName('pao1').AsInteger := lcb7.KeyValue;
+    end;
+    if lcb8.KeyValue <> NULL then
+    begin
+      Add('and P.ID_STORE = :stor1');
+      ParamByName('stor1').AsInteger := lcb8.KeyValue;
+    end;
+    if cbx1.ItemIndex > 0 then
+    begin
+      if sb1.Down then
+        case cbx1.ItemIndex of
+          1: Add('and (p.status = 0 or p.status is null)');
+          2: Add('and p.status = 10');
+          3: Add('and p.status = 20');
+          4: Add('and p.status = 30');
+          5: Add('and p.status = 40');
+          6: Add('and p.status = 60');
+          7: Add('and p.status = 70');
+          8: Add('and p.status = 100');
+          9: Add('and p.status = 110');
+          10: Add('and p.status = 120');
+        end;
+      if sb2.Down then
+        case cbx1.ItemIndex of
+          1: Add('and p.status > 0 and p.status is not null');
+          2: Add('and p.status > 10 and p.status is not null');
+          3: Add('and p.status > 20 and p.status is not null');
+          4: Add('and p.status > 30 and p.status is not null');
+          5: Add('and p.status > 40 and p.status is not null');
+          6: Add('and p.status > 60 and p.status is not null');
+          7: Add('and p.status > 70 and p.status is not null');
+          8: Add('and p.status > 100 and p.status is not null');
+          9: Add('and p.status > 110 and p.status is not null');
+          10: Add('and p.status > 120 and p.status is not null');
+        end;
+      if sb3.Down then
+        case cbx1.ItemIndex of
+          1: Add('and p.status is null');
+          2: Add('and (p.status < 10 or p.status is null)');
+          3: Add('and (p.status < 20 or p.status is null)');
+          4: Add('and (p.status < 30 or p.status is null)');
+          5: Add('and (p.status < 40 or p.status is null)');
+          6: Add('and (p.status < 60 or p.status is null)');
+          7: Add('and (p.status < 70 or p.status is null)');
+          8: Add('and (p.status < 100 or p.status is null)');
+          9: Add('and (p.status < 110 or p.status is null)');
+          10: Add('and (p.status < 120 or p.status is null)');
+        end;
+    end;
+    if cbx2.ItemIndex > 0 then
+    begin
+      case cbx2.ItemIndex of
+        1: Add('and p.D_OPEN >= :d1 and p.D_OPEN < :d2');
+        2: Add('and p.D_CONSTR >= :d1 and p.D_OPEN < :d2');
+        3: Add('and p.D_READY >= :d1 and p.D_OPEN < :d2');
+        4: Add('and p.D_CLOSE >= :d1 and p.D_OPEN < :d2');
+        5: Add('and p.LAST_SHIP >= :d1 and p.LAST_SHIP < :d2');
+      end;
+      ParamByName('d1').AsDate := Int(dtp1.Date);
+      ParamByName('d2').AsDate := Int(dtp2.Date) + 1;
+    end;
+    if not fmMain.UF89 then
+      add('and p.id_fix = ' + inttostr(SysVars.RegTN));
+    Add(OrdBy(dbg1));
+    Open;
+    Locate('ID_ORDER', C_ORD, []);
+  end;
+  with dmIS.qORD_S do
+  begin
+    Close;
+    DataSource := dsOrders;
+    Open;
+  end;
+  with dmIS.qORD_POS do
+  begin
+    Close;
+    DataSource := dsOrders;
+    Open;
+  end;
+  with dmIS.qOrd_PF do
+  begin
+    Close;
+    DataSource := dsOrders;
+    Open;
+  end;
+  with qOrds_p do
+  begin
+    Close;
+    DataSource := dsOrders;
+    Open;
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmOrders.OpenSumPack(SortType: word);
+begin
+  if dmIS.mT.Active then
+    dmIS.mT.CommitRetaining;
+  Screen.Cursor := crHourGlass;
+  ReadSelection;
+  with qORD_SUM_PACK, qORD_SUM_PACK.SQL do
+  begin
+    Close;
+    Clear;
+    Add('select p.id_order, p.n_order, p.name, p.amount, p.id_agent,');
+    Add('(P.PRICE + P.PRICEA) SUMPRICE, c.name NCURR, I.NAME AGENT,');
+    Add('p.d_open, p.d_ready, p.d_constr, p.d_close, p.status,');
+    Add('p.id_cprod, p.id_cptype, pt.name tpname, a.name prodname,');
+    Add('a1.name pa_out, a2.name stote, r1.fio manager, r2.fio designer,');
+    Add('r3.fio constr, p.f_constr, p.rem, p.d_reject,');
+    Add('p.id_doc, p.id_project, p.id_product, p.id_estimate, p.id_version,');
+    Add('p.prodused, p.receive, p.ship, sp.sproduced, sp.srecieved, sp.sshipped,');
+    Add('p.def_sum, p.total_payment, p.last_ship,');
+    Add('coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount s_ship,');
+    Add('coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount');
+    Add('- coalesce(p.total_payment,0) debt');
+    Add('from ((PROJECT_ORDS P left join ITEMS I');
+    Add('on P.ID_AGENT = I.ID_ITEM) left join PROJECTS J');
+    Add('on J.ID_PROJECT = P.ID_PROJECT) join currency c');
+    Add('on c.id_currency = p.id_currency join ptypes pt');
+    Add('on pt.id_ptype = p.id_cptype');
+    Add('join prod_areas a on a.id_p_area = p.id_cprod');
+    Add('left join prod_areas a1 on a1.id_p_area = p.id_pa_out');
+    Add('left join prod_areas a2 on a2.id_p_area = p.id_store');
+    Add('left join personnel r1 on r1.id_p = j.id_manager');
+    Add('left join personnel r2 on r2.id_p = j.id_designer');
+    Add('left join personnel r3 on r3.id_p = p.id_constr');
+    Add('join orders_sum_pack sp on sp.id_order = p.id_order where 1=1 ');
+    if cb1.Checked then
+      Add('and p.D_CLOSE is null');
+    if cb2.Checked then
+      Add('and p.D_CLOSE is not null');
+    if cb3.Checked then
+      Add('and p.D_REJECT is not null');
+    if cb6.Checked then
+      Add('and p.is_os is not null');
+    if cb7.Checked then
+      Add('and p.is_charge is not null');
+    if cb8.Checked then
+      Add('and (coalesce(p.def_sum,0)*coalesce(p.ship,0)/p.amount' +
+        ' > coalesce(p.total_payment,0))');
+    if lcb1.KeyValue <> NULL then
+    begin
+      Add('and P.ID_CPROD = :prod1');
+      ParamByName('prod1').AsInteger := lcb1.KeyValue;
+    end;
+    if lcb2.KeyValue <> NULL then
+    begin
+      Add('and P.ID_CPTYPE = :tp1');
+      ParamByName('tp1').AsInteger := lcb2.KeyValue;
+    end;
+    if lcb3.KeyValue <> NULL then
+    begin
+      Add('and J.ID_MANAGER = :man1');
+      ParamByName('man1').AsInteger := lcb3.KeyValue;
+    end;
+    if lcb4.KeyValue <> NULL then
+    begin
+      Add('and P.ID_AGENT = :ag1');
+      ParamByName('ag1').AsInteger := lcb4.KeyValue;
+    end;
+    if lcb5.KeyValue <> NULL then
+    begin
+      Add('and J.ID_DESIGNER = :dez1');
+      ParamByName('dez1').AsInteger := lcb5.KeyValue;
+    end;
+    if lcb6.KeyValue <> NULL then
+    begin
+      Add('and P.ID_CONSTR = :con1');
+      ParamByName('con1').AsInteger := lcb6.KeyValue;
+    end;
+    if lcb7.KeyValue <> NULL then
+    begin
+      Add('and P.ID_PA_OUT = :pao1');
+      ParamByName('pao1').AsInteger := lcb7.KeyValue;
+    end;
+    if lcb8.KeyValue <> NULL then
+    begin
+      Add('and P.ID_STORE = :stor1');
+      ParamByName('stor1').AsInteger := lcb8.KeyValue;
+    end;
+    if cbx1.ItemIndex > 0 then
+    begin
+      if sb1.Down then
+        case cbx1.ItemIndex of
+          1: Add('and (p.status = 0 or p.status is null)');
+          2: Add('and p.status = 10');
+          3: Add('and p.status = 20');
+          4: Add('and p.status = 30');
+          5: Add('and p.status = 40');
+          6: Add('and p.status = 60');
+          7: Add('and p.status = 70');
+          8: Add('and p.status = 100');
+          9: Add('and p.status = 110');
+          10: Add('and p.status = 120');
+        end;
+      if sb2.Down then
+        case cbx1.ItemIndex of
+          1: Add('and p.status > 0 and p.status is not null');
+          2: Add('and p.status > 10 and p.status is not null');
+          3: Add('and p.status > 20 and p.status is not null');
+          4: Add('and p.status > 30 and p.status is not null');
+          5: Add('and p.status > 40 and p.status is not null');
+          6: Add('and p.status > 60 and p.status is not null');
+          7: Add('and p.status > 70 and p.status is not null');
+          8: Add('and p.status > 100 and p.status is not null');
+          9: Add('and p.status > 110 and p.status is not null');
+          10: Add('and p.status > 120 and p.status is not null');
+        end;
+      if sb3.Down then
+        case cbx1.ItemIndex of
+          1: Add('and p.status is null');
+          2: Add('and (p.status < 10 or p.status is null)');
+          3: Add('and (p.status < 20 or p.status is null)');
+          4: Add('and (p.status < 30 or p.status is null)');
+          5: Add('and (p.status < 40 or p.status is null)');
+          6: Add('and (p.status < 60 or p.status is null)');
+          7: Add('and (p.status < 70 or p.status is null)');
+          8: Add('and (p.status < 100 or p.status is null)');
+          9: Add('and (p.status < 110 or p.status is null)');
+          10: Add('and (p.status < 120 or p.status is null)');
+        end;
+    end;
+    if cbx2.ItemIndex > 0 then
+    begin
+      case cbx2.ItemIndex of
+        1: Add('and p.D_OPEN >= :d1 and p.D_OPEN < :d2');
+        2: Add('and p.D_CONSTR >= :d1 and p.D_OPEN < :d2');
+        3: Add('and p.D_READY >= :d1 and p.D_OPEN < :d2');
+        4: Add('and p.D_CLOSE >= :d1 and p.D_OPEN < :d2');
+        5: Add('and p.LAST_SHIP >= :d1 and p.LAST_SHIP < :d2');
+      end;
+      ParamByName('d1').AsDate := Int(dtp1.Date);
+      ParamByName('d2').AsDate := Int(dtp2.Date) + 1;
+    end;
+    // Параметр - тип сортировки
+    case SortType of
+      1: Add(OrdBy(dbg1));
+      2: Add('order by J.ID_MANAGER, I.NAME, P.N_ORDER');
+    end;
+    Open;
+  end;
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmOrders.FormCreate(Sender: TObject);
+begin
+  C_MAN := 0;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Read('C_M', C_MAN);
+    ReadEh(dbg1, id_Form);
+  finally
+    Free;
+  end;
+  if C_MAN = 0 then
+    lcb3.KeyValue := null
+  else
+    lcb3.KeyValue := C_MAN;
+end;
+
+procedure TfmOrders.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  dmIS.qORD_S.Close;
+  dmIS.qORD_POS.Close;
+  dmIS.qOrd_PF.Close;
+  qOrds_p.Close;
+  qOrders.Close;
+  qPROD.Close;
+  qTPR.Close;
+  qMAN.Close;
+  qAGENTS.Close;
+  qDEZ.Close;
+  qCONSTR.Close;
+  qPA_OUT.Close;
+  qSTORE.Close;
+  dmIS.qUNITS.Close;
+  if lcb3.KeyValue = null then
+    C_MAN := 0
+  else
+    C_MAN := lcb3.KeyValue;
+  with TUserSettings.Create(dmIS.dbIS, id_Form) do
+  try
+    Write('C_M', C_MAN);
+    Write(dbg1, iniGridEh);
+  finally
+    Free;
+  end;
+ // dmIS.dbDOC.Connected := False;
+end;
+
+procedure TfmOrders.FormShow(Sender: TObject);
+begin
+ { if not dmIS.dbDOC.Connected then
+  try
+    dmIS.dbDOC.Connected := True;
+  except
+    MsgInformation('Нет связи с архивом данных', '');
+  end;     }
+  lb1.Clear;
+
+  pc1.ActivePage := ts1;
+  pc2.ActivePage := ss1;
+  pc3.ActivePage := hs1;
+  cbx1.ItemIndex := 0;
+  cbx2.ItemIndex := 0;
+  dtp2.DateTime := now;
+  dtp1.DateTime := dtp2.DateTime - 7;
+  lb2.Hide;
+  lb3.Hide;
+  dtp1.Hide;
+  dtp2.Hide;
+  qPROD.Close;
+  qPROD.Open;
+  qTPR.Close;
+  qTPR.Open;
+  qMAN.Close;
+  qMAN.Open;
+  //If qMAN.Locate('ID_P',SysVars.RegTN,[])
+  //Then lcb3.KeyValue := qMANID_P.AsInteger;
+  qAGENTS.Close;
+  qAGENTS.Open;
+  qDEZ.Close;
+  qDEZ.Open;
+  qCONSTR.Close;
+  qCONSTR.Open;
+  qPA_OUT.Close;
+  qPA_OUT.Open;
+  qSTORE.Close;
+  qSTORE.Open;
+  dmIS.qUNITS.Close;
+  dmIS.qUNITS.Open;
+  //OpenOrder;
+end;
+
+procedure TfmOrders.sb0Click(Sender: TObject);
+begin
+  OpenOrder;
+end;
+
+procedure TfmOrders.dbg1SortMarkingChanged(Sender: TObject);
+begin
+  OpenOrder;
+end;
+
+procedure TfmOrders.qOrdersCalcFields(DataSet: TDataSet);
+begin
+  case qOrdersSTATUS.AsInteger of
+    0: qOrdersNSTSTUS.AsString := 'Черновик';
+    10: qOrdersNSTSTUS.AsString := 'Утвержден менеджером';
+    20: qOrdersNSTSTUS.AsString := 'Утвержден руководителем';
+    30: qOrdersNSTSTUS.AsString := 'Получен производством';
+    40: qOrdersNSTSTUS.AsString := 'Утвержден в производство';
+    45: qOrdersNSTSTUS.AsString := 'Принят конструктором';
+    50: qOrdersNSTSTUS.AsString := 'Разработана технология';
+    60: qOrdersNSTSTUS.AsString := 'Утверждена технология';
+    70: qOrdersNSTSTUS.AsString := 'Принят в изготовление';
+    100: qOrdersNSTSTUS.AsString := 'Изготовлен полностью';
+    110: qOrdersNSTSTUS.AsString := 'Вывезен полностью';
+    120: qOrdersNSTSTUS.AsString := 'Выписан полностью';
+  end;
+end;
+
+procedure TfmOrders.tb1Click(Sender: TObject);
+begin
+  Screen.Cursor := crHourGlass;
+  GridToExcel(dbg1);
+  Screen.Cursor := crDefault;
+end;
+
+procedure TfmOrders.ed1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  FindGridValue(dbg1, ed1, Key, 'ID_ORDER');
+end;
+
+procedure TfmOrders.kb2Click(Sender: TObject);
+var
+  iddr: integer;
+begin
+  iddr := 0;
+  if qOrdersID_DOC.IsNull then
+    exit;
+  with dmIS.qIN, dmIS.qIN.SQL do
+  begin
+    Close;
+    Clear;
+    Add('select ID_DRAFT from PROJECT_DOCS where ID_PROJECT_DOC = :d1');
+    ParamByName('d1').AsInteger := qOrdersID_DOC.AsInteger;
+    Open;
+    if not IsEmpty then
+    begin
+      iddr := FieldByName('ID_DRAFT').AsInteger;
+      //fmMain.StoreDoc(0,iddr,'',dmIS.qR_BODY);
+      if not Assigned(fmAll) then
+        Application.CreateForm(TfmAll, fmAll);
+       Old_DocBody(iddr, 0, ''); // переход на новую базу документов
+      // fmAll.StoreDoc_r(iddr);
+    end;
+    Close;
+  end;
+end;
+
+procedure TfmOrders.N1Click(Sender: TObject);
+begin
+  if qOrdersID_DOC.IsNull then
+    exit;
+  //If not Assigned(fmRep) Then Application.CreateForm(TfmRep,fmRep);
+  fmAll.PrintMainDoc(qOrdersID_DOC.AsInteger, 1);
+end;
+
+procedure TfmOrders.N3Click(Sender: TObject);
+begin
+  if not fmMain.UF64 then
+    exit;
+  if qOrdersID_ESTIMATE.IsNull then
+  begin
+    MsgInformation('Отсутствует смета, связанная с заказом', 'Проверка');
+    exit;
+  end;
+  {If not Assigned(fmRep) Then Application.CreateForm(TfmRep,fmRep);
+  with fmREP do begin
+   qR_EST.Close;
+   qR_EST.ParamByName('id_estimate').asInteger := qOrdersID_ESTIMATE.AsInteger;
+   qR_EST.ParamByName('obj_kind').Clear;
+   qR_EST.Open;
+   rR_EST.Script.Variables['Est_Title'] := 'Смета';
+   rR_EST.ShowReport;
+  end;  }
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  fmAll.GetEstRep(qOrdersID_ESTIMATE.AsInteger, 1, fmMain.s19);
+end;
+
+procedure TfmOrders.kb3Click(Sender: TObject);
+var
+  d_id: integer;
+begin
+  d_id := 0;
+  with dmIS.qIN, dmIS.qIN.SQL do
+  begin
+    Close;
+    Clear;
+    Add('select ID_DOC FROM PRODUCT_DOCS');
+    Add('where ID_PRODUCT = :idp and ID_OBJECT = 0');
+    ParamByName('idp').AsInteger := qOrdersID_PRODUCT.AsInteger;
+    Open;
+    if not IsEmpty then
+      d_id := FieldByName('ID_DOC').AsInteger;
+    if d_id = 0 then
+      exit;
+  {  if not dmIS.dbDOC.Connected then
+    try
+      dmIS.dbDOC.Connected := True;
+    except
+      MsgError('Нет связи с хранилищем документов', 'Ошибка подключения');
+    end;  }
+    try
+      //fmMain.StoreDoc(0,d_id,'',dmIS.qS_BODY);
+      if not Assigned(fmAll) then
+        Application.CreateForm(TfmAll, fmAll);
+      Old_DocBody(d_id, 0, ''); // переход нановую базу документов
+     // fmAll.StoreDoc_r(d_id);
+    except
+      MsgError('Ошибка вывода документа', 'Ошибка');
+    end;
+  end;
+end;
+
+procedure TfmOrders.N2Click(Sender: TObject);
+begin
+  OpenSumPack(1);
+  rSUM_PACK.Script.Variables['SelOrders'] := lb1.Items.Text;
+  rSUM_PACK.ShowReport;
+end;
+
+procedure TfmOrders.dbg1GetCellParams(Sender: TObject; Column: TColumnEh;
+  AFont: TFont; var Background: TColor; State: TGridDrawState);
+begin
+  if (not qOrdersD_REJECT.IsNull) then
+    AFont.Style := [fsStrikeOut];
+  if qOrdersSTATUS.AsInteger >= 20 then
+  begin
+    // Background := clSkyBlue;
+    AFont.Style := [fsBold];
+  end;
+  if qOrdersIS_RESERVE.AsInteger = 1 then
+  begin
+    AFont.Style := [fsItalic];
+    AFont.Color := clRed;
+  end;
+  if (not qOrdersD_REJECT.IsNull) then
+    AFont.Style := [fsStrikeOut];
+  if (not qOrdersD_CLOSE.IsNull) then
+    Background := clMoneyGreen;
+end;
+
+procedure TfmOrders.pc3Change(Sender: TObject);
+begin
+  if pc3.ActivePage = hs2 then
+  begin
+    cb4.Checked := qOrdersCHARGE.AsInteger = 1;
+    cb5.Checked := qOrdersOS.AsInteger = 1;
+  end;
+end;
+
+procedure TfmOrders.cbx2CloseUp(Sender: TObject);
+begin
+  if cbx2.ItemIndex = 0 then
+  begin
+    lb2.Hide;
+    lb3.Hide;
+    dtp1.Hide;
+    dtp2.Hide;
+  end
+  else
+  begin
+    lb2.Show;
+    lb3.Show;
+    dtp1.Show;
+    dtp2.Show;
+  end;
+end;
+
+procedure TfmOrders.N4Click(Sender: TObject);
+begin
+  if qOrders.IsEmpty then
+    exit;
+  rDebt.Script.Variables['SelOrd'] := lb1.Items.Text;
+  rDebt.ShowReport;
+end;
+
+procedure TfmOrders.N5Click(Sender: TObject);
+begin
+  if qOrders.IsEmpty then
+    exit;
+  OpenSumPack(2);
+  rManDebt.Script.Variables['SelOrd2'] := lb1.Items.Text;
+  rManDebt.ShowReport;
+end;
+
+procedure TfmOrders.SpeedButton1Click(Sender: TObject);
+begin
+  Screen.Cursor := crHourGlass;
+  fmMain.Analiz := True;
+  if not Assigned(fmCliOrds) then
+    Application.CreateForm(TfmCliOrds, fmCliOrds);
+  fmCliOrds.pcAll.Pages[0].TabVisible := False;
+  fmCliOrds.pcAll.Pages[1].TabVisible := False;
+  Screen.Cursor := crDefault;
+  fmCliOrds.Show;
+  {NF_CliOrds := NF_CliOrds + 1;
+  Application.CreateForm(TfmCliOrds,f_CliOrds[NF_CliOrds]);
+  f_CliOrds[NF_CliOrds].Caption :=  'Заказы клиентов_' + IntToStr(NF_CliOrds);
+  f_CliOrds[NF_CliOrds].ind_form := NF_CliOrds;
+  f_CliOrds[NF_CliOrds].Show; }
+
+end;
+
+procedure TfmOrders.ToolButton1Click(Sender: TObject);
+begin
+  //fmMain.Est_Excel(qOrdersID_ESTIMATE.AsInteger) ;
+end;
+
+procedure TfmOrders.N6Click(Sender: TObject);
+begin
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  if cbPEO.Checked then
+    fmAll.Est_Excel(qOrdersID_ESTIMATE.AsInteger, 1);
+  if cbKD.Checked then
+    fmAll.Est_Excel(qOrdersID_ESTIMATE_KD.AsInteger, 1);
+end;
+
+procedure TfmOrders.N7Click(Sender: TObject);
+begin
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  if cbPEO.Checked then
+    fmAll.Est_Excel(qOrdersID_ESTIMATE.AsInteger, 0);
+  if cbKD.Checked then
+    fmAll.Est_Excel(qOrdersID_ESTIMATE_KD.AsInteger, 0);
+end;
+
+procedure TfmOrders.N8Click(Sender: TObject);
+begin
+  if not fmMain.UF64 then
+    exit;
+  if qOrdersID_ESTIMATE.IsNull then
+  begin
+    MsgInformation('Отсутствует смета, связанная с заказом', 'Проверка');
+    exit;
+  end;
+
+  if not Assigned(fmAll) then
+    Application.CreateForm(TfmAll, fmAll);
+  fmAll.GetEstRep(qOrdersID_ESTIMATE.AsInteger, 0, fmMain.s19);
+end;
+
+procedure TfmOrders.ToolButton4Click(Sender: TObject);
+begin
+  if not Assigned(fmOperRoute) then
+    Application.CreateForm(TfmOperRoute, fmOperRoute);
+  with fmOperRoute do
+  begin
+    if Showing then
+      Close;
+    if cbPEO.Checked then
+      ID_VER := qOrdersID_VERSION_PEO.AsInteger;
+    if cbKD.Checked then
+      ID_VER := qOrdersID_VERSION.AsInteger;
+    if id_ver > 0 then
+      Show;
+  end;
+end;
+
+procedure TfmOrders.cbPEOClick(Sender: TObject);
+begin
+  if cbPEO.Checked then
+    cbKD.State := cbUnchecked;
+end;
+
+procedure TfmOrders.cbKDClick(Sender: TObject);
+begin
+  if cbKD.Checked then
+    cbPEO.State := cbUnchecked;
+end;
+
+procedure TfmOrders.lcbAgCloseUp(Sender: TObject; Accept: Boolean);
+begin
+  qProj.Close;
+  qProj.Open;
+end;
+
+procedure TfmOrders.BitBtn1Click(Sender: TObject);
+begin
+  with qIns, qINs.sql do
+  begin
+    if lcbAg.KeyValue = null then
+      exit;
+    if lcbProj.KeyValue = null then
+      exit;
+
+    close;
+    clear;
+    add('update project_ords set ID_PROJECT = :idp, id_agent = :ida');
+    add('where id_order = :ido');
+    parambyname('ida').AsInteger := lcbAg.KeyValue;
+    parambyname('idp').AsInteger := lcbProj.KeyValue;
+    parambyname('ido').AsInteger := qOrdersID_ORDER.AsInteger;
+    ExecSQL;
+    Transaction.CommitRetaining;
+    OpenOrder;
+    pnCli.Visible := false;
+  end;
+end;
+
+procedure TfmOrders.ToolButton7Click(Sender: TObject);
+begin
+  if (qOrdersSTATUS.AsInteger > 10) and (not fmMain.UF118) then
+  begin
+    showmessage('Нельзя изменить клиента!');
+    exit;
+
+  end;
+  if not qAgent.Active then
+    qAgent.Open;
+  if not qProj.Active then
+    qProj.Open;
+  lcbAg.KeyValue := qOrdersID_AGENT.AsInteger;
+  lcbProj.KeyValue := qOrdersID_PROJECT.AsInteger;
+  pnCli.Visible := true;
+
+end;
+
+procedure TfmOrders.BitBtn2Click(Sender: TObject);
+begin
+  pnCli.Visible := false;
+end;
+
+procedure TfmOrders.cb3Click(Sender: TObject);
+begin
+  cbRej.Checked := false;
+end;
+
+procedure TfmOrders.FormActivate(Sender: TObject);
+begin
+  if fmMAin.UF143 then
+  begin
+    ToolButton1.visible := false;
+    fmAll.HideGridCOl(dbg1,
+      'SUMPRICE,SUMPRICE_bez_nds,DEF_SUM_bez_nds,DEF_SUM,TOTAL_PAYMENT,' +
+      'TOTAL_PAYMENT_bez_nds,DEBT,DEBT_bez_nds,SUMSHIP,SUMSHIP_bez_nds,S_SHIP_bez_nds,S_SHIP,EST_TOTAL_SUM_PEO,EST_TOTAL_SUM_PEO_bez_nds,EST_TOTAL_SUM_KD,EST_TOTAL_SUM_KD_bez_nds,DELIVERY_SUM,delivery_sum_bez_nds',
+      false);
+    fmAll.HideGridCOl(dbg5, 'PRICEA,sUMPRICE,PRICEA_BEZ_NDS,sUMPRICE_BEZ_NDS',
+      false);
+    fmAll.HideGridCOl(dbg6, 'SHIP,SHIP_BEZ_NDS,PAY,PAY_BEZ_NDS', false);
+  end;
+end;
+
+end.
+
